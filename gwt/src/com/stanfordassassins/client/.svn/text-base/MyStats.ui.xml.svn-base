@@ -1,0 +1,30 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		/* Add CSS here. See the GWT docs on UI Binder for more details */
+		.important {
+			font-weight: bold;
+		}
+	</ui:style>
+	<g:HTMLPanel>
+		<g:VerticalPanel>
+			<g:HorizontalPanel spacing="5">
+			<g:Label>Total kills: </g:Label> <g:Label ui:field="targetLabel" />
+			</g:HorizontalPanel>
+			
+			<g:HorizontalPanel spacing="5">
+			<g:Label>Total games played: </g:Label> <g:Label ui:field="timeRemainingLabel" />
+			</g:HorizontalPanel>
+			
+			<g:HorizontalPanel spacing="5">
+			<g:Label>So far you've killed: </g:Label> <g:Label ui:field="killedLabel" />
+			</g:HorizontalPanel>
+			
+			<g:HorizontalPanel spacing="5">
+			<g:Label>Your codeword for this game is: </g:Label> <g:Label ui:field="codewordLabel" />
+			</g:HorizontalPanel>
+			
+		</g:VerticalPanel>
+	</g:HTMLPanel>
+</ui:UiBinder> 

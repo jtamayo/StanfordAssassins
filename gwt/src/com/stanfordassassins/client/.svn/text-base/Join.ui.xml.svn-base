@@ -1,0 +1,20 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+	</ui:style>
+	<g:FlowPanel>
+	<g:HTMLPanel ui:field="signupPanel">
+		<p>
+		Put me on the waiting list for the next game.
+		</p>
+		Alias: <g:TextBox ui:field="aliasBox"/> <g:Button ui:field="goButton" text="Go"/>
+		<p>
+		Your alias is unique for each game, and it will be displayed in the news feed every time you assassinate a victim.
+		</p>
+	</g:HTMLPanel>
+	<g:HTMLPanel ui:field="waitingPanel">
+		You're in the waiting list for a game of assassins with the alias <g:InlineLabel ui:field="aliasLabel"/>
+	</g:HTMLPanel>
+	</g:FlowPanel>
+</ui:UiBinder> 

@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 29
+/svn/!svn/ver/33/trunk/server
+END
+make_game_deamon.php
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/33/trunk/server/make_game_deamon.php
+END
+emails.php
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/33/trunk/server/emails.php
+END
+db_login.php
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/11/trunk/server/db_login.php
+END
+gameserver.php
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/!svn/ver/33/trunk/server/gameserver.php
+END
+.htaccess
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/31/trunk/server/.htaccess
+END
+login.php
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/33/trunk/server/login.php
+END

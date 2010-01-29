@@ -1,0 +1,45 @@
+// Initial protocol plan
+// Shown as example JSON
+
+// reply object
+{
+    "status" => "OK",
+}
+
+// user object
+{
+    "userId": 13423,
+    "name": "Juan Tamayo",
+    "email": "jtamayo@cs.stanford.edu",
+    "status": "NOTHING",
+    "waitingAlias": "ppsdpdp",
+    "waitingStart": "2010-01-17 13:13:13",
+}
+
+// user stats object
+{
+    "kills": 4,
+    "gamesPlayed": 3,
+}
+
+// news feed object
+{
+    "assassinAlias": "jjcrew",
+    "targetAlias": "poopi",
+    "tagetFirstName": "Bill",
+    "tagetLastName": "Gates",
+    "time: "2010-01-17 13:13:13",
+    "description": "Blah Blah",
+}
+
+// game object
+{
+    "gameId": 1432,
+    "name": "Operation Yellow Tiger",
+    "targetFirstName": "Isac",
+    "targetLastName": "Bulm",
+    "targetAlias": "ipoo",
+    "killDeadline": "2010-01-16 23:23:23",
+    "codeWord": "teapot",
+}
+

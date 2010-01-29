@@ -1,0 +1,4 @@
+DirectoryIndex WebAuth.php
+AuthType WebAuth
+require privgroup stanford:student
+require privgroup stanford:administrative
