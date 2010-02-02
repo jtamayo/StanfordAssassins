@@ -50,6 +50,10 @@ h1 {
   margin: 15px 6px 6px;
 }
 
+.dialogOKButton {
+  float: right;
+}
+
 /* DEBUG */
 
 #waitingList {

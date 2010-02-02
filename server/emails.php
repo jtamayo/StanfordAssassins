@@ -1,16 +1,16 @@
 <?php
 	function sendGameStarted($email, $gameId, $gameName, $codeword, $targetAlias, $targetName) {
-		$subject  = 'The game of assassins has been started';
+		$subject  = "$gameName has started";
 		$body = <<<END_OF_BODY
 <p>$gameName has begun.</p>
 
 <p>Your codeword for this game is <b>$codeword</b>; keep it on you at all times.</p>
 
-<p>Your target for now is $targetName (who goes by the alias of $targetAlias). As usual you have 96 hours to complete and report the assassination.</p>
+<p>Your target for now is $targetName ($targetAlias). You have 96 hours to complete and report the assassination.</p>
 
-<p>The guild should not need to remind you to stay within the rules at all times. (http://stanfordassassins.com/rules.html)</p>
+<p>The guild should not need to remind you to stay within the rules at all times. You can view the rules here: http://stanfordassassins.com/rules.html</p>
 
-<p>To go to your game page click here: http://stanfordassassins.com/#myGame-$gameId</p>
+<p>To go to the game page click here: http://stanfordassassins.com</p>
 
 <p>Remember, someone out there is out to get you so trust no one.</p>
 
@@ -19,23 +19,23 @@ END_OF_BODY;
 		return sendHtmlEmail($email, $subject, $body);
 	}
 	
-	function sendBeenAssassinated($email, $assassinAlias, $assassinName, $description) {
+	function sendBeenAssassinated($email, $assassinAlias, $assassinName, $details) {
 		$subject  = 'You have been assassinated';
 		$body = <<<END_OF_BODY
 <p>You have been assassinated by $assassinName (aka $assassinAlias).</p>
 
-<p>$assassinName described the kill as: <em>"$description"</em></p>
+<p>$assassinName described the kill as: <em>"$details"</em></p>
 
 <p>Let’s hope that you can learn from this.</p>
 
-<p>To join the next game, go to: http://stanfordassassins.com/#join</p>
+<p>To join the next game, go to: http://stanfordassassins.com</p>
 
 <p>Better luck next time.</p>
 END_OF_BODY;
 		return sendHtmlEmail($email, $subject, $body);
 	}
 
-	function sendAssassinIsOut($email, $assassinAlias, $assassinName, $description) {
+	function sendAssassinIsOut($email, $assassinAlias, $assassinName, $details) {
 		$subject  = 'Someone else is after you';
 		$body = <<<END_OF_BODY
 <p>Your assassin, $assassinName (aka $assassinAlias), is out of the game.</p>
@@ -55,15 +55,15 @@ END_OF_BODY;
 
 <p>The guild should not need to remind you to stay within the rules at all times. (http://stanfordassassins.com/rules.html)</p>
 
-<p>To go to your game page click here: http://stanfordassassins.com/#myGame-$gameId</p>
+<p>To go to your game page click here: http://stanfordassassins.com</p>
 END_OF_BODY;
 		return sendHtmlEmail($email, $subject, $body);
 	}
 	
-	function sendGameFinished($email, $gameId, $gameName, $winnerAlias, $winnerName) {
+	function sendGameOver($email, $gameId, $gameName, $winnerAlias, $winnerName) {
 		$subject  = '$gameName has ended';
 		$body = <<<END_OF_BODY
-<p>$gameName has been won by $winnerName (aka $winnerAlias).</p>
+<p>$gameName has been won by $winnerName ($winnerAlias).</p>
 END_OF_BODY;
 		return sendHtmlEmail($email, $subject, $body);
 	}
@@ -76,15 +76,15 @@ END_OF_BODY;
 		return sendHtmlEmail($email, $subject, $body);
 	}
 	
-	function sendBeenDispute($email, $uid1, $user1, $claim1, $uid2, $user2, $claim2, $disputeId) {
+	function sendBeenDispute($email, $uid1, $player1, $claim1, $uid2, $player2, $claim2, $disputeId) {
 		$subject  = 'There has been a dispute';
 		$body = <<<END_OF_BODY
-<p>$user1 has a dispute with $user2</p>
+<p>$player1 has a dispute with $player2</p>
 
-$user1 claims that:
+$player1 claims that:
 <p>$claim1</p>
 
-$user2 claims that:
+$player2 claims that:
 <p>$claim2</p>
 
 Who do you think is right?
@@ -92,13 +92,13 @@ Who do you think is right?
 	<input type="hidden" name="cmd" value="dispute-judge"/>
 	<input type="hidden" name="disputeId" value="$disputeId"/>
 	<input type="hidden" name="vote" value="$uid1"/>
-	<input type="submit" value="$user1 is right" />
+	<input type="submit" value="$player1 is right" />
 </form>
 <form action="http://stanfordassassins.com/gameserver.php" method="get">
 	<input type="hidden" name="cmd" value="dispute-judge"/>
 	<input type="hidden" name="disputeId" value="$disputeId"/>
 	<input type="hidden" name="vote" value="$uid2"/>
-	<input type="submit" value="$user2 is right" />
+	<input type="submit" value="$player2 is right" />
 </form>
 <form action="http://stanfordassassins.com/gameserver.php" method="get">
 	<input type="hidden" name="cmd" value="dispute-judge"/>

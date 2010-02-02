@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<title>Stanford Assassins - Rules</title>
+        <style type="text/css">
+        body {
+          font-family: Helvetica, Arial, sans-serif;
+          font-size: 18px;
+        }
+        
+        h1 {
+          font-size: 40px;
+          font-weight: bold;
+          color: #777777;
+          margin-top: 10px;
+          margin-bottom: 30px;
+          text-align: center;
+        }
+        
+        h3 {
+          font-size: 24px;
+          font-weight: bold;
+        }
+        </style>
+	</head>
+	<body>
+        <h1>Stanford Assassins Rules</h1>
+		<h4>Goal</h4>
+		<div>
+			Stay alive... If you can.
+			The main goal of an assassins game is to be the last person alive when the game ends!
+		</div>
+		<h4>The World of Assassins</h4>
+		<div>
+			It is a dubious world out there. Everybody is out there to get you. Trust no one but yourself since everybody is a possible assassin.
+			At the all times during the game each player is assigned a target and has a specific time window to find and assassinate the target. 
+		</div>
+        <h4>Codewords</h4>
+		<div>
+			The codeword is the sacred secret you were entrusted with. Guard it with your life.
+			Give the codeword only to the person that eliminates you.
+		</div>
+		<h4>Assassinating</h4>
+		<div>
+			Track down your target and when the right time comes...
+			You can assasasinate your target by using a melee or ranged weapon.
+		</div>
+		<h4>Weapons</h4>
+		<div>
+			You are only authorized to use two weapons:
+            <ul>
+            	<li>A spoon – touch your target with the curved side of the spoon</li>
+            	<li>A sock – throw a <em>clean</em> rolled up sock at your target</li>
+            </ul>
+		</div>
+        <!--
+		<h4>Self-Protection</h4>
+		<div>
+			Watch your back...
+			Your are allowed to use a designated weapon to perfom a self-defense kill if you notice sometone approaching for a kill.
+		</div>
+        -->
+		<h4>Safe Zones</h4>
+		<div>
+			<ul>
+				<li>Target's Room</li>
+				<li>Classes (only when in session)</li>
+				<li>Office hours</li>
+				<li>Restrooms - you really want to give them some space</li>
+				<li>Places of religious worship</li>
+			</ul>
+		</div>
+		<h4>Assassination report</h4>
+		<div>
+			Report an assassination on the website by typing in your target's codeword. Your new target will be assigned to you immediately (or you will be declared the winner).
+		</div>
+	</body>
+</html>

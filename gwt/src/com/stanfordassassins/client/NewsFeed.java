@@ -36,11 +36,11 @@ public class NewsFeed extends Composite {
 		addRow("ApplePie", "Vegan", "During his dinner.");
 	}
 
-	private void addRow(String killer, String victim, String description) {
+	private void addRow(String killer, String victim, String details) {
 		feedTable.insertRow(0);
 		DisclosurePanel panel = new DisclosurePanel();
 		panel.setHeader(new HTML( "<b>" + killer + " killed " + victim + ".</b> Details..."));
-		panel.setContent(new Label("According to " + killer + ", " + description));
+		panel.setContent(new Label("According to " + killer + ", " + details));
 		panel.setOpen(true);
 		feedTable.setWidget(0, 0, panel);
 	}

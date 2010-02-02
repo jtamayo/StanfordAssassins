@@ -8,5 +8,7 @@ public enum ServerResults {
 	ALIAS_TAKEN, 
 	// The player is in a state where he cannot join a new game
 	BAD_STATE,
-	BAD_CODEWORD;
+	BAD_CODEWORD,
+	// Returned every time something doesn't make sense for the server
+	INVALID;
 }

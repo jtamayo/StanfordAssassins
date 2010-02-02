@@ -6,9 +6,9 @@
     "status" => "OK",
 }
 
-// user object
+// player object
 {
-    "userId": 13423,
+    "playerId": 13423,
     "name": "Juan Tamayo",
     "email": "jtamayo@cs.stanford.edu",
     "status": "NOTHING",
@@ -16,7 +16,7 @@
     "waitingStart": "2010-01-17 13:13:13",
 }
 
-// user stats object
+// player stats object
 {
     "kills": 4,
     "gamesPlayed": 3,
@@ -24,10 +24,10 @@
 
 // news feed object
 {
+    "gameId": "100",
     "assassinAlias": "jjcrew",
     "targetAlias": "poopi",
-    "tagetFirstName": "Bill",
-    "tagetLastName": "Gates",
+    "tagetName": "Bill Gates",
     "time: "2010-01-17 13:13:13",
     "description": "Blah Blah",
 }
@@ -36,10 +36,29 @@
 {
     "gameId": 1432,
     "name": "Operation Yellow Tiger",
-    "targetFirstName": "Isac",
-    "targetLastName": "Bulm",
+    "alias": "pooface",
+    "targetFirstName": "Isac Bulm",
     "targetAlias": "ipoo",
     "killDeadline": "2010-01-16 23:23:23",
     "codeWord": "teapot",
 }
+
+// on kill
+// cmd=reportAssassination return BAD_CODEWORD, OK + game object
+
+// cmd=getLeaderboard
+{
+    status: Ok
+    leaderboard: []
+}
+
+Leadearboard entry:
+{
+    playerId: "23",
+    name: "Juan Tamayo",
+    assassinations: "3",
+    gamesPalyed: "33",
+    gamesWon: "3"
+}
+
 

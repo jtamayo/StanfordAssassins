@@ -6,8 +6,16 @@
 		.important {
 			font-weight: bold;
 		}
+		
+		.alias {
+			float: right;	
+			font-size: 18px;
+			font-weight: bold;
+			color: #777777;
+		}
 	</ui:style>
-	<g:FlowPanel ui:field="myGameContentPanel">
+	<g:HTMLPanel ui:field="myGameContentPanel">
+		<g:Label ui:field="aliasLabel" addStyleNames="{style.alias}"></g:Label>
 		<g:HTMLPanel ui:field="reportPanel">
 			<h3>Report an assassination</h3>
 			Enter the codeword of your victim and press report.
@@ -31,13 +39,13 @@
 					So far you've killed <g:InlineLabel addStyleNames="{style.important}" ui:field="killedLabel" /> players.
 				</g:HTMLPanel>
 			</g:VerticalPanel>
-				
-		</g:HTMLPanel>	
-	
+		</g:HTMLPanel>
+		
+		<div id="statusText"></div>
 	
 		<g:HTMLPanel>
 			<h3>Game News</h3>
 			<g:FlexTable ui:field="feedTable" />
 		</g:HTMLPanel>
-	</g:FlowPanel>
+</g:HTMLPanel>
 </ui:UiBinder> 

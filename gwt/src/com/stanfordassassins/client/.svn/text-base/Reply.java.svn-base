@@ -31,8 +31,21 @@ public class Reply extends JavaScriptObject {
 		return this.games;
 	}-*/;
 	
+	public final native JsArray<News> getNews() /*-{
+		return this.news;
+	}-*/;
+	
 	public final native Game getGame() /*-{
 		return this.game;
 	}-*/;
-
+	
+	public final native String getAssassinationId() /*-{
+		return this.assassinationId;
+	}-*/;
+	public final native JsArray<PlayerStats> getLeaderboard() /*-{
+		return this.playerStats;
+}-*/;
+	public final native PlayerStats getPlayerStats() /*-{
+	return this.playerStats;
+}-*/;
 }

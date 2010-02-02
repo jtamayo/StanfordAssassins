@@ -54,32 +54,32 @@ if($fail === false) {
     }
 }
 
-// authenticate user
+// authenticate player
 if($fail === false) {
 	require_once 'db_login.php';
 	$date = gmdate("Y-m-d H:i:s");
 	
-	$sql = "SELECT userId FROM users WHERE email='$email' LIMIT 1;";
+	$sql = "SELECT playerId FROM players WHERE email='$email' LIMIT 1;";
 	$result = mysql_query($sql) or ($fail = mysql_error());
 	if($fail === false) {
 		if($row = mysql_fetch_assoc($result)) {
-			// user exists get the userId
-			$userId = $row['userId'];
+			// player exists get the playerId
+			$playerId = $row['playerId'];
 			
 			// update the last time logged in
-			$sql = "UPDATE users SET lastLogin='$date' WHERE userId='$userId' LIMIT 1;";
+			$sql = "UPDATE players SET lastLogin='$date' WHERE playerId='$playerId' LIMIT 1;";
 			mysql_query($sql) or ($fail = mysql_error());
 		} else {
-			// first time user, create him
-			$sql = "INSERT INTO users (email, name, rule, dateCreated, lastLogin) VALUES ('$email', '$name', '$rule', '$date', '$date');";
+			// first time player, create him
+			$sql = "INSERT INTO players (email, name, rule, dateCreated, lastLogin) VALUES ('$email', '$name', '$rule', '$date', '$date');";
 			mysql_query($sql) or ($fail = mysql_error());
 			if($fail === false) {
-				$sql = "SELECT userId FROM users WHERE email='$email' LIMIT 1;";
+				$sql = "SELECT playerId FROM players WHERE email='$email' LIMIT 1;";
 				$result = mysql_query($sql) or ($fail = mysql_error());
 				if($fail === false) {
 					if($row = mysql_fetch_assoc($result)) {
-						// user exists get the userId
-						$userId = $row['userId'];
+						// player exists get the playerId
+						$playerId = $row['playerId'];
 					} else {
 						$fail = 'the imposible happened';
 					}
@@ -92,13 +92,28 @@ if($fail === false) {
 // create session
 if($fail === false) {
 	session_start();
-	$_SESSION['userId'] = intval($userId);
+	$_SESSION['playerId'] = intval($playerId);
 	header("Location: http://stanfordassassins.com/StanfordAssassins.html");
 } else {
 ?>
 <html>
 <head>
-<title>step chart</title>
+    <title>Stanford Assassins</title>
+    <style type="text/css">
+    body {
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 18px;
+    }
+    
+    h1 {
+      font-size: 40px;
+      font-weight: bold;
+      color: #777777;
+      margin-top: 10px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    </style>
 </head>
 <body style="text-align: center; padding-top: 200px;">
 	<h1>Stanford Assassins</h1>

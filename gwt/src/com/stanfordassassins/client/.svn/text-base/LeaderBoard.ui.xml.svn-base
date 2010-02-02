@@ -8,16 +8,30 @@
 		}
 	</ui:style>
 	<g:HTMLPanel>
-		<table>
+	<table>
 		<tr>
-		<td><b>Score</b></td><td><b>Kills</b></td>
-		</tr><tr>
-		<td>Juan Tamayo</td><td>100</td>
-		</tr><tr>
-		<td>Jeff Heer</td><td>40</td>
-		</tr><tr>
-		<td>Bradolph Pitler</td><td>7</td>
+		<td>
+				<u>Assassinations</u>
+		</td>
+		<td>
+				<u>Games Played</u>
+		</td>
+		<td>
+				<u>Games Won</u>
+		</td>
 		</tr>
-		</table>
+		<tr>
+		<td>
+			
+				<g:FlexTable ui:field="leaderboardAssassinations" />
+		</td>
+		<td>
+				<g:FlexTable ui:field="leaderboardGamesPlayed" />
+		</td>
+		<td>
+				<g:FlexTable ui:field="leaderboardGamesWon" />
+		</td>
+		</tr>
+	</table>
 	</g:HTMLPanel>
 </ui:UiBinder> 
