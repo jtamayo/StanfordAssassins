@@ -21,7 +21,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -34,7 +33,7 @@ public class StanfordAssassins implements EntryPoint {
 
 	private static final Method METHOD = RequestBuilder.POST;
 	public static String SERVER_URL = "http://stanfordassassins.com/gameserver.php";
-	//public static String SERVER_URL = "http://localhost:8888/proxy";
+//	public static String SERVER_URL = "http://localhost:8888/proxy";
 
 	/**
 	 * ID for the content div in the ui.xml
@@ -71,6 +70,7 @@ public class StanfordAssassins implements EntryPoint {
 			public void onResponseReceived(Request request, Response response) {
 				if (200 == response.getStatusCode()) {
 					Reply reply = Reply.asReply(response.getText());
+					System.err.println(response.getText());
 					if (reply.getStatus() == ServerResults.OK) {
 						login(reply.getPlayer(), reply.getGames(), reply.getNews());
 					} else {
@@ -182,6 +182,7 @@ public class StanfordAssassins implements EntryPoint {
 		FlowPanel panel = new FlowPanel();
 		panel.addStyleName("dialogVPanel");
 		HTML w = new HTML(text);
+		w.setWidth("400px");
 //		w.setWidth("20 0px");
 //		w.setWidth("100%");
 		panel.add(w);

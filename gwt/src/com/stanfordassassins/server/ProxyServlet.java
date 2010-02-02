@@ -49,6 +49,7 @@ public class ProxyServlet extends HttpServlet {
 		
 		InputStream i = conn.getInputStream();
 		
+		resp.setHeader("Content-Type", "application/json");
 		ServletOutputStream os = resp.getOutputStream();
 		while ((character = i.read()) != -1) {
 			os.write(character);

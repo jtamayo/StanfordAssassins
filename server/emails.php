@@ -61,7 +61,7 @@ END_OF_BODY;
 	}
 	
 	function sendGameOver($email, $gameId, $gameName, $winnerAlias, $winnerName) {
-		$subject  = '$gameName has ended';
+		$subject  = "$gameName has ended";
 		$body = <<<END_OF_BODY
 <p>$gameName has been won by $winnerName ($winnerAlias).</p>
 END_OF_BODY;

@@ -1,5 +1,6 @@
 <?php
-	header('Content-Type: text/plain; charset=utf-8');
+	//header('Content-Type: text/plain; charset=utf-8');
+	header('Content-Type: application/json; charset=utf-8');
 	
 	$invalidArg = false; # assume that we are valid
 	
@@ -110,8 +111,8 @@
 	}
 	
 	function arg($arg) {
-		if(isset($_POST[$arg])) return addslashes($_POST[$arg]);
-		if(isset($_GET[$arg])) return addslashes($_GET[$arg]);
+		if(isset($_POST[$arg])) return ini_get('magic_quotes_gpc') ? $_POST[$arg] : addslashes($_POST[$arg]);
+		if(isset($_GET[$arg])) return ini_get('magic_quotes_gpc') ? $_GET[$arg] : addslashes($_GET[$arg]);
 		return false;
 	}
 	
@@ -212,7 +213,7 @@
 				$sql  = "SELECT assassinations.assassinationId, players.playerId AS newVictimId, players.name AS newVictimName, participations.alias AS newVictimAlias ";
 				$sql .= "FROM assassinations INNER JOIN players ON assassinations.victimId = players.playerId ";
 				$sql .= "INNER JOIN participations ON participations.playerId = players.playerId ";
-				$sql .= "WHERE assassinations.gameId = '$gameId' AND participations.gameId = '$gameId' AND assassinations.assassinId = '$victimId' LIMIT 1;";
+				$sql .= "WHERE assassinations.gameId = '$gameId' AND participations.gameId = '$gameId' AND assassinations.assassinId = '$victimId' AND assassinations.state='PENDING' LIMIT 1;";
 				$result = mysql_query($sql) or sql_error_report($sql);
 				if($row = mysql_fetch_assoc($result)) {
 					$failedAssassination = $row['assassinationId'];
@@ -220,7 +221,7 @@
 					$newVictimName = $row['newVictimName'];
 					$newVictimAlias = $row['newVictimAlias'];
 				} else {
-					$ret = array("status" => "IMPOSSIBLE");
+					$ret = array("status" => "IMPOSSIBLE1");
 					die(json_encode($ret));
 				}
 				
@@ -243,6 +244,8 @@
 				/// UPDATE END DATE IN ASSASSINATIONS
 					
 				if($newVictimId == $playerId) {
+					require_once('emails.php');
+					
 					// game has been won by playerId
 					// update player's participation to WON
 					$sql = "UPDATE participations SET state='WON' WHERE gameId = '$gameId' AND playerId = '$playerId' LIMIT 1;";
@@ -265,7 +268,7 @@
 					if($row = mysql_fetch_assoc($result)) {
 						$winnerName = $row['name'];
 					} else {
-						$ret = array("status" => "IMPOSSIBLE");
+						$ret = array("status" => "IMPOSSIBLE2");
 						die(json_encode($ret));
 					}
 					
@@ -275,7 +278,7 @@
 					if($row = mysql_fetch_assoc($result)) {
 						$winnerAlias = $row['alias'];
 					} else {
-						$ret = array("status" => "IMPOSSIBLE");
+						$ret = array("status" => "IMPOSSIBLE3");
 						die(json_encode($ret));
 					}
 					
@@ -285,7 +288,7 @@
 					if($row = mysql_fetch_assoc($result)) {
 						$gameName = $row['name'];
 					} else {
-						$ret = array("status" => "IMPOSSIBLE");
+						$ret = array("status" => "IMPOSSIBLE4");
 						die(json_encode($ret));
 					}
 					
@@ -308,11 +311,16 @@
 				}
 				
 				$game = getGameObject($playerId, $gameId);
-				$ret = array(
-					"status" => "OK",
-					"game" => $game,
-					"assassinationId" => $assassinationId
-				);
+				if($game !== false) {
+					$ret = array(
+						"status" => "OK",
+						"game" => $game,
+						"assassinationId" => $assassinationId
+					);
+				} else {
+					$ret = array("status" => "IMPOSSIBLE4.5");
+					die(json_encode($ret));
+				}
 				
 				print json_encode($ret);
 			} else {
@@ -323,7 +331,7 @@
 				print json_encode($ret);
 			}
 		} else {
-			$ret = array("status" => "IMPOSSIBLE");
+			$ret = array("status" => "IMPOSSIBLE5");
 			die(json_encode($ret));
 		}
 	}
@@ -382,7 +390,7 @@
 		$sql  = "SELECT games.gameId, games.name AS gameName, participations.alias, participations.codeword, games.state AS gameState, participations.state AS participationState ";
 		$sql .= "FROM games ";
 		$sql .= "INNER JOIN participations ON participations.gameId = games.gameId ";
-		$sql .= "WHERE participations.playerId='$playerId'" . ($findGameId===false?';':" AND games.gameId = '$findGameId' ORDER BY games.gameId DESC;");
+		$sql .= "WHERE participations.playerId='$playerId' " . ($findGameId===false?'ORDER BY games.startDate DESC;':"AND games.gameId = '$findGameId' LIMIT 1;");
 		$result = mysql_query($sql) or sql_error_report($sql);
 		while($row = mysql_fetch_assoc($result)) {
 			$gameId = $row['gameId'];
@@ -403,13 +411,13 @@
 				$sql .= "INNER JOIN players AS victims ON assassinations.victimId = victims.playerId ";
 				$sql .= "INNER JOIN participations AS victimPart ON victimPart.playerId = assassinations.victimId ";
 				$sql .= "WHERE victimPart.gameId = '$gameId' AND assassinations.state = 'PENDING' AND assassinations.assassinId='$playerId' LIMIT 1;";
-				$result = mysql_query($sql) or sql_error_report($sql);
-				if($row = mysql_fetch_assoc($result)) {
+				$result2 = mysql_query($sql) or sql_error_report($sql);
+				if($row = mysql_fetch_assoc($result2)) {
 					$game["targetName"] = $row["targetName"];
 					$game["targetAlias"] = $row["targetAlias"];
 					$game["killDeadline"] = $row["endDate"];
 				} else {
-					$ret = array( "status" => "IMPOSSIBLE" );
+					$ret = array( "status" => "IMPOSSIBLE6" );
 					die(json_encode($ret));
 				}
 			}
@@ -508,7 +516,7 @@
 				return;
 			}
 		} else {
-			$ret = array( "status" => "IMPOSSIBLE" );
+			$ret = array( "status" => "IMPOSSIBLE7" );
 			die(json_encode($ret));
 		}
 		
@@ -524,7 +532,7 @@
 			print json_encode($ret);
 			return;
 		} else {
-			$ret = array( "status" => "IMPOSSIBLE" );
+			$ret = array( "status" => "IMPOSSIBLE8" );
 			print json_encode($ret);
 			return;
 		}

@@ -14,7 +14,15 @@
 		</p>
 	</g:HTMLPanel>
 	<g:HTMLPanel ui:field="waitingPanel">
-		You're in the waiting list for a game of assassins with the alias <g:InlineLabel ui:field="aliasLabel"/>
+		<h3>Waiting List</h3>
+		<p>
+		You're in the waiting list for a game of assassins with the alias <g:InlineLabel ui:field="aliasLabel"/>. You will receive an email as soon as
+		the game starts. Please note this might take up to 48 hours. 
+		</p>
+		<p>
+		While you're waiting, 
+		acquaint yourself with the <a href="http://stanfordassassins.com/rules.html">rules</a>.
+		</p> 
 	</g:HTMLPanel>
 	</g:FlowPanel>
 </ui:UiBinder> 

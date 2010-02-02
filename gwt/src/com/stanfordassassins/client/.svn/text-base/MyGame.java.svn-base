@@ -231,7 +231,6 @@ public class MyGame extends Composite {
 
 		// Create the popup dialog box
 		final DialogBox dialogBox = new DialogBox();
-		dialogBox.setWidth("200px");
 		
 		dialogBox.setText("Tell us the details");
 		final Button okButton = new Button("OK");
@@ -255,8 +254,13 @@ public class MyGame extends Composite {
 
 		VerticalPanel dialogVPanel = new VerticalPanel();
 		dialogVPanel.addStyleName("dialogVPanel");
-		dialogVPanel.add(new HTML("<b>Congratulation on assassinating " + oldGame.getTargetName() + "</b><br/>" + "Your new target is " + newGame.getTargetName() + "(" + newGame.getTargetAlias()
-				+ ")" + "<br/>" + "If you have a good assassination story, share it here, to make the other players fear and respect your awesomeness:<br/>"));
+		String html = "<b>Congratulation on assassinating " + oldGame.getTargetName() + "</b><br/>" ;
+		if (newGame.getGameState() == GameState.ACTIVE) {
+			html += "Your new target is " + newGame.getTargetName() + "(" + newGame.getTargetAlias()
+			+ ")" + "<br/>";
+		}
+		html += "If you have a good assassination story, share it here, to make the other players fear and respect your awesomeness:<br/>";
+		dialogVPanel.add(new HTML(html));
 		dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
 		dialogVPanel.add(detailsArea);
 		dialogVPanel.add(remainingCharsPanel);
@@ -282,8 +286,9 @@ public class MyGame extends Composite {
 	 */
 	public void updateNews(JsArray<News> newsArray) {
 		feedTable.clear();
-		for (int i = newsArray.length() -1; i > 0; i--) { // Do it backwards, because we insert things at the top
+		for (int i = newsArray.length() -1; i >= 0; i--) { // Do it backwards, because we insert things at the top
 			News news = newsArray.get(i);
+			System.out.println("News: game=" + news.getGameId() + " details:" + news.getdetails());
 			if (news.getGameId() == game.getGameId()) {
 				addRow(news.getAssassinAlias(), news.getTargetAlias() + " (" + news.getTargetName() + ")", news.getdetails());
 			}

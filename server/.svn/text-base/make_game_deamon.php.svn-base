@@ -59,10 +59,10 @@
 		$result = mysql_query($sql) or sql_error_report($sql);
 		while($row = mysql_fetch_assoc($result)) {
 			$playerId = $row['playerId'];
-			$playerNameMap[$playerId] = $row['name'];
-			$playerEmailMap[$playerId] = $row['email'];
-			$playerAliasMap[$playerId] = $row['waitingAlias'];
-			$playerCodewordMap[$playerId] = array_pop($codewords);
+			$playerNameMap[$playerId] = addslashes($row['name']);
+			$playerEmailMap[$playerId] = addslashes($row['email']);
+			$playerAliasMap[$playerId] = addslashes($row['waitingAlias']);
+			$playerCodewordMap[$playerId] = addslashes(array_pop($codewords));
 			
 			if($participationList != '') $participationList .= ', ';
 			$participationList .= "('$gameId', '$playerId', '$playerAliasMap[$playerId]', '$playerCodewordMap[$playerId]')";
