@@ -31,9 +31,7 @@ public class NewsFeed extends Composite {
 	public NewsFeed(Player result) {
 		initWidget(uiBinder.createAndBindUi(this));
 
-		addRow("JellyBelly", "Spiderman", "While he was tying his shoe, I hit him with a sock right on the face.");
-		addRow("PennyLane", "Ms. Robinson", "In the middle of the street.");
-		addRow("ApplePie", "Vegan", "During his dinner.");
+		
 	}
 
 	private void addRow(String killer, String victim, String details) {

@@ -30,5 +30,7 @@ public enum ServerOperations {
 	 * Invoked to send a stack trace to the server in case of an error.
 	 */
 	reportError
+	,
+	reportLike
 	;
 }

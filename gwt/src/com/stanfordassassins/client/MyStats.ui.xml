@@ -3,24 +3,144 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style>
 		/* Add CSS here. See the GWT docs on UI Binder for more details */
-		.important {
+		.alias {	
+			font-size: 18px;
+			font-weight: bold;
+			color: #333;
+		}
+		
+		.codeword {
+			font-size: 18px;
+			font-weight:	bold;
+			color: #F11;
+		}
+		
+		.sidebar {
+			background-color: #DC9;
+			vertical-align:top;
+			padding-left:	10px;
+			padding-right:	10px;
+			padding-top:	10px;
+			padding-bottom:	10px;
+			width:			25%; 
+		}
+		
+		.mainbar {
+			padding-left:	10px;
+			padding-right:	10px;
+			padding-top:	10px;
+			padding-bottom:	10px;
+			vertical-align:	top; 
+			width:			75%;
+		}
+		
+		.reportBox {
+			height:	32px;
+			font-size:	medium;
+			width: 300px;
+		}
+		.reportButton {
+			height: 32px;
+			font-size:	medium;
+		}
+		
+		.disputeAnchor {
+			font-size:	x-small;
+		}
+		
+		.subheader {
+			margin-top:	0px;
+			margin-bottom:	8px;
 			font-weight: bold;
 		}
+		
+		.table {
+			border-collapse: collapse;
+		}
+		
+		.gameInfo {
+			font-weight: bold;
+			padding-left: 8px;
+		}
+		
+		.gameInfoLabel {
+		}
+		
+		.statsRow{
+			
+		}
+		
+		.statsNoColumn{
+			text-align: center ;
+		}
+		
+		.statsTable{
+			border: 1px solid black ;
+		}
+		
 	</ui:style>
 	<g:HTMLPanel>
-		<g:VerticalPanel>
-			<g:HorizontalPanel spacing="5">
-			<g:Label>Total Games Played: </g:Label> <g:Label ui:field="gamesPlayed" />
-			</g:HorizontalPanel>
+		<table cellspacing="0" cellpadding="0" addStyleNames="{style.table}">
+		<tr>
+			<td class="{style.sidebar}">
 			
-			<g:HorizontalPanel spacing="5">
-			<g:Label>Total games won: </g:Label> <g:Label ui:field="gamesWon" />
-			</g:HorizontalPanel>
-			
-			<g:HorizontalPanel spacing="5">
-			<g:Label>So far you've killed: </g:Label> <g:Label ui:field="assassinations" />
-			</g:HorizontalPanel>
-			
-		</g:VerticalPanel>
+				<g:VerticalPanel>
+					<g:HorizontalPanel spacing="5">
+						<g:Label addStyleNames="{style.subheader}">Badges</g:Label>
+					</g:HorizontalPanel>
+					
+					<g:HorizontalPanel spacing="5">
+						<g:Label addStyleNames="{style.subheader}">Game Badges</g:Label>
+					</g:HorizontalPanel>
+				</g:VerticalPanel>
+				
+			</td>
+			<td class="{style.mainbar}">
+				<table cellspacing="0" cellpadding="0" addStyleNames="{style.statsTable}">
+					<tr class="{style.statsRow}">
+						<td>
+							<g:Label>Total Games Played: </g:Label>
+						</td>
+						<td>
+							<g:Label ui:field="gamesPlayed" addStyleNames="{style.statsNoColumn}" />
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<g:Label>Total games won:</g:Label>
+						</td>
+						<td>
+							<g:Label ui:field="gamesWon" addStyleNames="{style.statsNoColumn}"  />
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<g:Label>Assassinations:</g:Label>
+						</td>
+						<td>
+							<g:Label ui:field="assassinations" addStyleNames="{style.statsNoColumn}" />
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<g:Label>People that liked your stories: </g:Label>
+						</td>
+						<td>
+							<g:Label ui:field="totalLikes" addStyleNames="{style.statsNoColumn}" />
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<g:Label>Longest Killing Spree: </g:Label> 
+						</td>
+						<td>
+							<g:Label ui:field="killingSpree" addStyleNames="{style.statsNoColumn}"  />
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+	
 	</g:HTMLPanel>
 </ui:UiBinder> 

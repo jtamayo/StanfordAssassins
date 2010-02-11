@@ -3,49 +3,138 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style>
 		/* Add CSS here. See the GWT docs on UI Binder for more details */
-		.important {
-			font-weight: bold;
+		.alias {	
+			font-size: 25px;
+			font-weight: normal;
+			line-height: 20px;
+		}
+
+		.codewordHeader {
+			font-size:	14px;
 		}
 		
-		.alias {
-			float: right;	
+		.codeword {
+			font-size: 16px;
+			/*font-weight:	bold;*/
+			color:	#E11;
+		}
+		
+		.codewordPanel {
+			padding-left:	8px;
+		}
+		
+		.sidebar {
+			background-color: #FFC;
+			vertical-align:top;
+			padding-left:	10px;
+			padding-right:	10px;
+			padding-top:	15px;
+			padding-bottom:	10px;
+			width:			27%; 
+		}
+		
+		.mainbar {
+			padding-left:	10px;
+			padding-right:	10px;
+			padding-top:	10px;
+			padding-bottom:	10px;
+			vertical-align:	top; 
+			width:			73%;
+		}
+		
+		.reportBox {
+			height:	32px;
+			font-size:	medium;
+			width: 300px;
+		}
+		.reportButton {
+			height: 32px;
+			font-size:	medium;
+		}
+		
+		.disputeAnchor {
+			font-size:	x-small;
+		}
+		
+		.subheader {
+			margin-top:	0px;
+			margin-bottom:	8px;
+		}
+		
+		.mytable {
+			border-collapse: collapse;
+			table-layout: fixed;
+			width: 100%;
+		}
+		
+		.gameInfo {
 			font-size: 18px;
-			font-weight: bold;
-			color: #777777;
 		}
-	</ui:style>
-	<g:HTMLPanel ui:field="myGameContentPanel">
-		<g:Label ui:field="aliasLabel" addStyleNames="{style.alias}"></g:Label>
-		<g:HTMLPanel ui:field="reportPanel">
-			<h3>Report an assassination</h3>
-			Enter the codeword of your victim and press report.
-			<g:HorizontalPanel spacing="5"><g:TextBox ui:field="victimBox" /> <g:Button ui:field="reportKillButton">Report</g:Button> </g:HorizontalPanel>
-				<g:HorizontalPanel spacing="5">
-					<g:Anchor ui:field="disputeWithTargetAnchor" text="Dispute with target" href="#"/> <!-- TODO: Fix the href so the link looks nice, but doesn't point to a random place in the page -->
-					<g:Anchor ui:field="disputeWithAssassinAnchor" text="Dispute with assassin" href="#"/>
-				</g:HorizontalPanel>
-			<h3>Game information</h3>
-			<g:VerticalPanel>
-				<g:HTMLPanel>
-					Your target is <g:InlineLabel addStyleNames="{style.important}" ui:field="targetLabel" />
-				</g:HTMLPanel>
-				<g:HTMLPanel>
-					You have <g:InlineLabel addStyleNames="{style.important}" ui:field="timeRemainingLabel" /> hous remaining to assassinate your victim.					
-				</g:HTMLPanel>
-				<g:HTMLPanel>
-					Your codeword for this game is <g:InlineLabel addStyleNames="{style.important}" ui:field="codewordLabel" />. Only disclose it when you're assassinated!
-				</g:HTMLPanel>
-				<g:HTMLPanel>
-					So far you've killed <g:InlineLabel addStyleNames="{style.important}" ui:field="killedLabel" /> players.
-				</g:HTMLPanel>
-			</g:VerticalPanel>
-		</g:HTMLPanel>
 		
-		<div id="statusText"></div>
+		.gameInfoLabel {
+			font-size: 14px;
+		}
+		
+		.feedTable {
+			width: 100%;
+		}
+		
+		.timer {
+			font-size: 36px;
+		}
+		
+		.gameInfoPanel {
+			margin-top: 5px;
+		}
+		
+	</ui:style>
 	
-		<g:HTMLPanel>
-			<h3>Game News</h3>
-			<g:FlexTable ui:field="feedTable" />
-		</g:HTMLPanel>
-</g:HTMLPanel>
+	<g:HTMLPanel>
+	<table cellspacing="0" cellpadding="0" class="{style.mytable}">
+		<tr>
+			<td class="{style.sidebar}">
+				<g:Label ui:field="aliasLabel" addStyleNames="{style.alias}"></g:Label>
+				<g:HTMLPanel addStyleNames="{style.codewordPanel}">
+					<span class="{style.codewordHeader}">codeword</span> 
+					<g:InlineLabel addStyleNames="{style.codeword}" ui:field="codewordLabel"/>
+				</g:HTMLPanel>
+				<g:VerticalPanel ui:field="gameInfoPanel" addStyleNames="{style.gameInfoPanel}" width="100%">
+					<g:Label addStyleNames="{style.gameInfoLabel}">Target</g:Label>
+					<g:Label addStyleNames="{style.gameInfo}" ui:field="targetLabel" />
+					<g:Label addStyleNames="{style.gameInfo}, {style.timer}" ui:field="timeRemainingLabel" />
+					<g:HTMLPanel visible="false">
+						<div class="{style.gameInfoLabel}">Victims so far</div>
+						<g:Label addStyleNames="{style.gameInfo}" ui:field="killedLabel" />
+					</g:HTMLPanel>
+				</g:VerticalPanel>
+				
+				<g:HTMLPanel ui:field="myGameContentPanel">
+				<div id="statusText" addStyleNames="{style.sidebar}"></div>
+				</g:HTMLPanel>
+			</td>
+			<td class="{style.mainbar}">
+			
+				<g:HTMLPanel ui:field="reportPanel">
+					<h3 class="{style.subheader}">Report an assassination</h3>
+					Enter the codeword of your victim and press report.
+					<g:HorizontalPanel spacing="5">
+					<g:TextBox ui:field="victimBox" addStyleNames="{style.reportBox}"/> 
+					<g:Button ui:field="reportKillButton" addStyleNames="{style.reportButton}">Report</g:Button>
+					<g:VerticalPanel>
+						<g:Anchor ui:field="disputeWithTargetAnchor" addStyleNames="{style.disputeAnchor}" text="Dispute with target" href="#"/> <!-- TODO: Fix the href so the link looks nice, but doesn't point to a random place in the page -->
+						<g:Anchor ui:field="disputeWithAssassinAnchor" addStyleNames="{style.disputeAnchor}" text="Dispute with assassin" href="#"/>
+					</g:VerticalPanel> 
+					</g:HorizontalPanel>
+				</g:HTMLPanel>
+				<g:HTMLPanel>
+					<h3 class="{style.subheader}">Obituaries</h3>
+					<g:FlexTable ui:field="feedTable" addStyleNames="{style.feedTable}"/>
+				</g:HTMLPanel>
+			</td>
+		</tr>
+	</table>
+	
+	
+	</g:HTMLPanel>
+	
 </ui:UiBinder> 

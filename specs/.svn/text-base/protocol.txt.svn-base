@@ -24,12 +24,15 @@
 
 // news feed object
 {
+    "assassinationId": "34",
     "gameId": "100",
     "assassinAlias": "jjcrew",
     "targetAlias": "poopi",
     "tagetName": "Bill Gates",
     "time: "2010-01-17 13:13:13",
     "description": "Blah Blah",
+    "likes" => "13",
+	"isLiked" => "1"
 }
 
 // game object

@@ -18,11 +18,13 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -32,6 +34,10 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.HTMLTable;
+import com.google.gwt.user.client.ui.Grid;
 
 /**
  * @author juanmtamayo
@@ -42,7 +48,7 @@ public class MyGame extends Composite {
 	private static MyGameUiBinder uiBinder = GWT.create(MyGameUiBinder.class);
 	private StanfordAssassins controller;
 	
-	private Game game;
+	 Game game;
 
 	interface MyGameUiBinder extends UiBinder<Widget, MyGame> {
 	}
@@ -54,7 +60,7 @@ public class MyGame extends Composite {
 	@UiField
 	Label codewordLabel;
 	@UiField
-	Label killedLabel;
+	Label killedLabel; // TODO: update it with the list of victims
 	@UiField
 	TextBox victimBox;
 	@UiField
@@ -67,6 +73,8 @@ public class MyGame extends Composite {
 	HTMLPanel reportPanel;
 	@UiField
 	Label aliasLabel;
+	@UiField
+	VerticalPanel gameInfoPanel;
 
 	public MyGame(Game game, StanfordAssassins controller) {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -97,20 +105,22 @@ public class MyGame extends Composite {
 		this.game = game;
 		
 		aliasLabel.setText(game.getAlias());
+		codewordLabel.setText(game.getCodeword());// Always set the codeword, because it's next to the alias
 		
 		switch (game.getGameState()) {
 		case ACTIVE:
 			if (game.getParticipationState() == ParticipationState.ACTIVE) {
 				// Show all the target time and stuff
-				targetLabel.setText(game.getTargetName() + " (aka " + game.getTargetAlias() + ").");
+				targetLabel.setText(game.getTargetName() + " (" + game.getTargetAlias() + ")");
 				
 				timeRemainingLabel.setText(getTimeRemaining(game));
-				codewordLabel.setText(game.getCodeword());
 				reportPanel.setVisible(true);
+				gameInfoPanel.setVisible(true);
 			} else if (game.getParticipationState() == ParticipationState.ASSASSINATED) {
 				// Write "game over"
 				myGameContentPanel.addAndReplaceElement(new HTML("<h2>Game Over</h2> You've been assassinated, but you can still monitor the progress of the game in the game news."), "statusText");
 				reportPanel.setVisible(false);
+				gameInfoPanel.setVisible(false);
 			}
 			break;
 		case FINISHED:
@@ -121,6 +131,7 @@ public class MyGame extends Composite {
 				myGameContentPanel.addAndReplaceElement(new HTML("<h2>Game Over</h2> The game has finished. Check the news for details on the winner."), "statusText");
 			}
 			reportPanel.setVisible(false);
+			gameInfoPanel.setVisible(false);
 			break;
 		case PENDING:
 			//Do nothing, it should never happen
@@ -131,17 +142,80 @@ public class MyGame extends Composite {
 		
 	}
 
-	private void addRow(String killer, String victim, String details) {
+	private void addRow(String killer, String victim, String details,int likes,boolean isLiked,final int assassinationId,Date assassinationDate) {
 		feedTable.insertRow(0);
-		DisclosurePanel panel = new DisclosurePanel();
-		if (details != null && !"".equals(details)) {
-			panel.setHeader(new HTML( "<b>" + killer + " assassinated " + victim + ".</b> Details..."));
-			panel.setContent(new Label("According to " + killer + ", " + details));			
-		} else {
-			panel.setHeader(new HTML( "<b>" + killer + " assassinated " + victim + "</b>"));
+		HTMLTable newsFeed = new Grid(4,1);
+		newsFeed.getElement().addClassName("newsFeedBox");
+		FlowPanel likePanel = new FlowPanel();
+		likePanel.getElement().addClassName("likePanel");
+		
+		final HTMLTable assassinationRow = new Grid(1,1);
+		final HTMLTable controlRow = new Grid(1,2);
+		
+		assassinationRow.setHTML(0, 0,"<b>" + killer + " assassinated " + victim + ".</b>");
+		if (isLiked){
+			likePanel.add(new HTML("<b>You</b> and " + (likes -1) + " other people like this"));
+			
 		}
-		panel.setOpen(true);
-		feedTable.setWidget(0, 0, panel);
+		else{
+			likePanel.add(new HTML(likes + " people like this"));
+		}  
+		newsFeed.setWidget(0, 0,assassinationRow);  
+		newsFeed.setWidget(2, 0,likePanel);  
+		
+		if (details != null && !"".equals(details)) {
+			newsFeed.setWidget(1, 0,new Label("According to " + killer + ", " + details));  		
+		} else {
+			newsFeed.setWidget(1, 0,new Label(""));  
+		}
+		 
+		String s = getTimeAgoString(assassinationDate);
+	    
+	    controlRow.setWidget(0, 0,new Label(s));  
+	   
+	    if (!isLiked){
+	    	final Anchor likeLink = new Anchor("Like");
+	    	likeLink.addClickHandler(new ClickHandler() {
+			
+	    		public void onClick(ClickEvent event) {
+	    			controller.like(MyGame.this, assassinationId);
+				}
+	    	});
+	    	controlRow.setWidget(0, 1,likeLink); 
+	    }
+	    else{
+	    	controlRow.setWidget(0, 1,new Label("")); 
+	    }
+	
+		newsFeed.setWidget(3, 0,controlRow);  
+		
+		feedTable.setWidget(0, 0, newsFeed);
+	}
+
+	private String getTimeAgoString(Date assassinationDate) {
+		long milliseconds1 = (new Date()).getTime() ;
+	    long milliseconds2 = assassinationDate.getTime();
+	    long diff = milliseconds1 - milliseconds2;
+	    long diffSeconds = diff / 1000;
+	    long diffMinutes = diff / (60 * 1000);
+	    long diffHours = diff / (60 * 60 * 1000);
+	    long diffDays = diff / (24 * 60 * 60 * 1000);
+	    String s = "" ;	
+	   
+	    if (diffDays >= 1) {
+	    	s = diffDays + " Days ago" ;
+	    }
+	    else if(diffHours >= 1){
+	    	s = diffHours + " Hours ago" ;
+	    }
+	    else if(diffMinutes >= 1){
+	    	s = diffMinutes + " Minutes ago" ;
+	    }
+	    else if(diffSeconds >= 1){
+	    	s = diffSeconds + " Seconds ago" ;
+	    }
+	    else s= "aaa" ;
+		return s;
 	}
 	
 	private String getTimeRemaining(Game game) {
@@ -174,6 +248,7 @@ public class MyGame extends Composite {
 	void onClick(ClickEvent e) {
 		controller.assassinate(victimBox.getText().trim(), this, game.getGameId());
 	}
+	
 	
 	private void showDisputeMessage() {
 		// Create the popup dialog box
@@ -290,7 +365,7 @@ public class MyGame extends Composite {
 			News news = newsArray.get(i);
 			System.out.println("News: game=" + news.getGameId() + " details:" + news.getdetails());
 			if (news.getGameId() == game.getGameId()) {
-				addRow(news.getAssassinAlias(), news.getTargetAlias() + " (" + news.getTargetName() + ")", news.getdetails());
+				addRow(news.getAssassinAlias(), news.getTargetAlias() + " (" + news.getTargetName() + ")", news.getdetails(),news.getLikes(),news.isLiked(),news.getAssassinationId(),news.getTime());
 			}
 		}
 	}

@@ -1,17 +1,29 @@
 K 25
 svn:wc:ra_dav:version-url
 V 30
-/svn/!svn/ver/43/trunk/gwt/war
+/svn/!svn/ver/62/trunk/gwt/war
 END
 StanfordAssassins.css
 K 25
 svn:wc:ra_dav:version-url
 V 52
-/svn/!svn/ver/43/trunk/gwt/war/StanfordAssassins.css
+/svn/!svn/ver/62/trunk/gwt/war/StanfordAssassins.css
+END
+favicon.png
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/61/trunk/gwt/war/favicon.png
 END
 StanfordAssassins.html
 K 25
 svn:wc:ra_dav:version-url
 V 53
-/svn/!svn/ver/30/trunk/gwt/war/StanfordAssassins.html
+/svn/!svn/ver/56/trunk/gwt/war/StanfordAssassins.html
+END
+favicon.ico
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/61/trunk/gwt/war/favicon.ico
 END

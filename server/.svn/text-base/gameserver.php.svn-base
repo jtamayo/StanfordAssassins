@@ -336,6 +336,29 @@
 		}
 	}
 	
+	function reportLike($playerId, $assassinationId) {
+		$sql = "SELECT likeId FROM likes WHERE assassinationId='$assassinationId' AND playerId='$playerId' LIMIT 1;";
+		$result = mysql_query($sql) or sql_error_report($sql);
+		if($row = mysql_fetch_assoc($result)) {
+			$ret = array(
+				"status" => "ALREADY_LIKED"
+			);
+			
+			print json_encode($ret);
+			return;
+		}
+		
+		$sql = "INSERT INTO likes (assassinationId, playerId) VALUES ('$assassinationId', '$playerId');";
+		mysql_query($sql) or sql_error_report($sql);
+		
+		$ret = array(
+			"status" => "OK"
+		);
+		
+		print json_encode($ret);
+		return;
+	}
+	
 	function addDetails($playerId, $assassinationId, $details) {
 		require_once('db_login.php');
 		
@@ -442,7 +465,9 @@
 		$news = array();
 		$twoMinAgo = gmdate("Y-m-d H:i:s", time() - 2*60);
 		
-		$sql  = "SELECT assassinations.gameId, assassinPart.alias AS assassinAlias, targetPart.alias AS targetAlias, targetPlayer.name AS tagetName, assassinations.endDate, assassinations.details ";
+		$sql  = "SELECT assassinations.assassinationId, assassinations.gameId, assassinPart.alias AS assassinAlias, targetPart.alias AS targetAlias, targetPlayer.name AS tagetName, assassinations.endDate, assassinations.details, ";
+		$sql .= "(SELECT COUNT(*) FROM likes WHERE likes.assassinationId = assassinations.assassinationId) AS numLike, ";
+		$sql .= "(SELECT COUNT(*) FROM likes WHERE likes.assassinationId = assassinations.assassinationId AND likes.playerId = '$playerId' LIMIT 1) AS isLiked ";
 		$sql .= "FROM assassinations ";
 		$sql .= "INNER JOIN participations AS playerPart ON assassinations.gameId = playerPart.gameId ";
 		$sql .= "INNER JOIN participations AS assassinPart ON assassinations.gameId = assassinPart.gameId AND assassinations.assassinId = assassinPart.playerId ";
@@ -452,12 +477,15 @@
 		$result = mysql_query($sql) or sql_error_report($sql);
 		while($row = mysql_fetch_assoc($result)) {
 			$new = array(
+				"assassinationId" => $row['assassinationId'],
 				"gameId" => $row['gameId'],
 			    "assassinAlias" => $row['assassinAlias'],
 			    "targetAlias" => $row['targetAlias'],
 			    "targetName" => $row['tagetName'],
 			    "time" => $row['endDate'],
-			    "details" => ($row['details']!='#'?$row['details']:'')
+			    "details" => ($row['details']!='#'?$row['details']:''),
+				"likes" => $row['numLike'],
+			    "isLiked" => $row['isLiked']
 			);
 			array_push($news, $new);
 		}

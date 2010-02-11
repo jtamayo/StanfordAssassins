@@ -37,18 +37,43 @@ public class News extends JavaScriptObject{
 		return FormatUtil.parseDate(getTimeString());
 	}
 
+	private native final String getAssassinationIdString() /*-{
+	return this.assassinationId;
+}-*/;
+	
+	public final int getAssassinationId() {
+		return Integer.parseInt(getAssassinationIdString());
+	}
 
-
+	private native final String getLikesString() /*-{
+	return this.likes;
+}-*/;
+	
+	public final int getLikes() {
+		return Integer.parseInt(getLikesString());
+	}
+	
+	private native final String getIsLikedString() /*-{
+	return this.isLiked;
+}-*/;
+	
+	public final boolean isLiked() {
+		return (Integer.parseInt(getIsLikedString())==1)?true:false ;
+	}
 	
 	
 	protected News(){}
 	
+	// news feed object
 //	{
-//		"gameId": "100",
-//		"assassinAlias": "jjcrew",
-//		"targetAlias": "poopi",
-//		"tagetName": "Bill Gates",
-//		"time: "2010-01-17 13:13:13",
-//		"details": "Blah Blah",
-//		}
+//	 Ê Ê"assassinationId": "34",
+//	 Ê Ê"gameId": "100",
+//	 Ê Ê"assassinAlias": "jjcrew",
+//	 Ê Ê"targetAlias": "poopi",
+//	 Ê Ê"tagetName": "Bill Gates",
+//	 Ê Ê"time: "2010-01-17 13:13:13",
+//	 Ê Ê"description": "Blah Blah",
+//	 Ê Ê"likes" => "13",
+//	 "isLiked" => "1"
+//	}
 }

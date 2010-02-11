@@ -1,0 +1,11 @@
+CREATE TABLE  `oguievet_assdev`.`likes` (
+`likeId` INT NOT NULL AUTO_INCREMENT ,
+`assassinationId` INT NOT NULL ,
+`playerId` INT NOT NULL ,
+PRIMARY KEY (  `likeId` )
+) ENGINE = MYISAM ;
+
+ALTER TABLE  `likes` ADD UNIQUE (
+`assassinationId` ,
+`playerId`
+);

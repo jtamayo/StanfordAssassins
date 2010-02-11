@@ -8,7 +8,11 @@ $message = $_ENV['WEBAUTH_LDAP_DISPLAYNAME'] . '|' . $_ENV['WEBAUTH_LDAP_MAIL'] 
 $messageSign = md5($message . $HASH_SALT) . $message;
 $encrypt = XOREncrypt($messageSign, $XOR_KEY);
 
-header("Location: http://stanfordassassins.com/login.php?r=$encrypt");
+if(isset($_GET['dev']) {
+    header("Location: http://stanfordassassins.com/dev/login.php?r=$encrypt");
+} else {
+    header("Location: http://stanfordassassins.com/login.php?r=$encrypt");
+}
 exit(0);
 
 /**

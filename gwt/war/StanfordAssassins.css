@@ -1,11 +1,21 @@
 /** Add css rules here for your application. */
 
+html {
+	overflow-y: scroll;
+}
+
 body {
-	padding-top: 10px;
 	color: #000;
 	background: #fff;
-	font-family: Helvetica, Arial, sans-serif;
+	font-family: Arial, sans-serif;
 	font-size: 24px;
+}
+
+#content {
+	margin-left:auto;
+	margin-right:auto;
+	width:800px;
+	background-color: #F2ECD9;	
 }
 
 h1 {
@@ -17,11 +27,18 @@ h1 {
   text-align: center;
 }
 
+h2 {
+	margin-top:	5px;
+	margin-bottom:	5px;
+	
+}
+
 .headerCont {
-	padding-bottom: 22px;
-	padding-left: 5px;
-	padding-right: 5px;
-	font-size: 16px;
+	background-color: #C41E3A;
+	margin-bottom: 10px;
+	padding: 3px;
+	background-image: url(images/red_header_bg.jpg);
+	background-repeat: repeat-x;
 }
 
 /** Example rules used by the template application 
@@ -37,6 +54,20 @@ h1 {
   width: 400px;
 }
 
+.gwt-TabBar .gwt-TabBarItem {
+  background-color: #D9C892;
+}
+
+.gwt-TabBar .gwt-TabBarItem-selected {
+  background-color: #CAB368;
+}
+
+.gwt-TabPanelBottom {
+  padding: 0px;	
+  background-color: white;
+  border-color: #CAB368;
+}
+
 .dialogVPanel {
   margin: 5px;
 }
@@ -50,10 +81,38 @@ h1 {
   margin: 15px 6px 6px;
 }
 
+.leaderBoardRow {
+	width: 233px;
+	cellspacing:0 ;
+	cellpadding:0 ;
+}
+.leaderBoardRankingColumn{
+ 	font-style italic ;
+ 	text-align:left;
+ 	width: 33px;
+}
+.leaderBoardNameColumn{
+ 	font-weight bold ;
+ 	text-align: left;
+ 	width: 165px;
+ 	padding-right: 5px;
+}
+.leaderBoardValueColumn{
+ 	text-align:left;
+ 	width: 20px;
+}
+
 .dialogOKButton {
   float: right;
 }
 
+.likePanel {
+	background-color: #ECEFF5;
+	/*width:	100%;*/
+	}
+.newsFeedBox {
+	width: 100%;
+}
 /* DEBUG */
 
 #waitingList {

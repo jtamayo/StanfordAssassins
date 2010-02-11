@@ -33,7 +33,10 @@ public class MyStats extends Composite {
 	Label gamesWon;
 	@UiField
 	Label assassinations;
-	
+	@UiField
+	Label totalLikes;
+	@UiField
+	Label killingSpree;
 	
 	public MyStats() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -46,5 +49,7 @@ public class MyStats extends Composite {
 		gamesPlayed.setText(""+stats.getGamesPlayed());
 		assassinations.setText(""+stats.getAssassinations());
 		gamesWon.setText(""+stats.getGamesWon());
+		//likes.setText(""+stats.getTotalLikes());
+		//killingSpree.setText(""+stats.getKillingSpree());
 	}
 }

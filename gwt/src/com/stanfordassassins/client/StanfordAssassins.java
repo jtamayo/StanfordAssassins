@@ -8,6 +8,10 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -15,12 +19,14 @@ import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.http.client.RequestBuilder.Method;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -30,10 +36,18 @@ public class StanfordAssassins implements EntryPoint {
 	private interface MyCallback {
 		public void onResponseReceived(Request request, Response response);
 	}
-
+	
+	private enum ApplicationState {
+		INIT, LOGGED_IN
+	}
+	
+	private enum HistoryTokens {
+		Join, MyStats, Leaderboard
+	}
+	
 	private static final Method METHOD = RequestBuilder.POST;
-	public static String SERVER_URL = "http://stanfordassassins.com/gameserver.php";
-//	public static String SERVER_URL = "http://localhost:8888/proxy";
+//	public static String SERVER_URL = "http://stanfordassassins.com/gameserver.php";
+	public static String SERVER_URL = "http://localhost:8888/proxy";
 
 	/**
 	 * ID for the content div in the ui.xml
@@ -46,6 +60,7 @@ public class StanfordAssassins implements EntryPoint {
 	 */
 	private static final int NUM_GAMES = 2;
 	
+	private ApplicationState appState;
 	
 	private TabPanel tabPanel;
 	private Join joinPage;
@@ -53,7 +68,7 @@ public class StanfordAssassins implements EntryPoint {
 	// State for the game
 	private Player player;
 	private List<Game> games = new ArrayList<Game>();
-
+	
 	private LeaderBoard leaderboard;
 	private MyStats myStats ;
 
@@ -65,6 +80,15 @@ public class StanfordAssassins implements EntryPoint {
 		
 		GWT.setUncaughtExceptionHandler(new ExceptionHandler());
 		
+		appState = ApplicationState.INIT;
+		
+		History.addValueChangeHandler(new ValueChangeHandler<String>() {
+			
+			public void onValueChange(ValueChangeEvent<String> event) {
+				onHistoryChange(event.getValue());
+			}
+		});
+		
 		request("cmd=" + ServerOperations.allData, new MyCallback() {
 			
 			public void onResponseReceived(Request request, Response response) {
@@ -72,7 +96,7 @@ public class StanfordAssassins implements EntryPoint {
 					Reply reply = Reply.asReply(response.getText());
 					System.err.println(response.getText());
 					if (reply.getStatus() == ServerResults.OK) {
-						login(reply.getPlayer(), reply.getGames(), reply.getNews());
+						allDataOK(reply.getPlayer(), reply.getGames(), reply.getNews());
 					} else {
 						// Authentication failed, redirect to home page
 						redirect("http://stanfordassassins.com/login.php"); 
@@ -83,13 +107,53 @@ public class StanfordAssassins implements EntryPoint {
 			}
 		});
 	}
+	
+	private void onHistoryChange(String token) {
+		if (appState == ApplicationState.INIT) {
+			return; // If we're not logged in, there's no state to change to
+		}
+		try {
+			HistoryTokens hTokens = HistoryTokens.valueOf(token);
+			switch (hTokens) {
+			case Join:
+				if (shouldDisplayJoinPage(player)) {
+					tabPanel.selectTab(tabPanel.getWidgetIndex(joinPage));
+				}
+				break;
+			case Leaderboard:
+				tabPanel.selectTab(tabPanel.getWidgetIndex(leaderboard));
+				break;
+			case MyStats:
+				tabPanel.selectTab(tabPanel.getWidgetIndex(myStats));
+				break;
+			}
+		} catch (IllegalArgumentException e) {
+			// The token does not exist, try finding a game
+			for (int i = 0; i < tabPanel.getWidgetCount(); i++) {
+				Widget w = tabPanel.getWidget(i);
+				if (w instanceof MyGame) {
+					MyGame g = (MyGame) w;
+					String gameName = buildGameName(g.game);
+					if (gameName.equals(token)) {
+						tabPanel.selectTab(tabPanel.getWidgetIndex(g));
+						break;
+					}
+				}
+			}
+		}
+	}
 
-	public void login(Player player, JsArray<Game> games, JsArray<News> news) {
+	private String buildGameName(Game game) {
+		return game.getName().replace(" ", "");
+	}
+
+	public void allDataOK(Player player, JsArray<Game> games, JsArray<News> news) {
 		RootPanel.get(CONTENT).clear();
 		this.player = player;
+		this.appState = ApplicationState.LOGGED_IN;
 
 		tabPanel = new TabPanel();
-		if (player.getState() == PlayerState.NOTHING || player.getState() == PlayerState.WAITING) {
+		if (shouldDisplayJoinPage(player)) {
 			// Display the join page only if the player is not playing a game
 			joinPage = new Join(this, player);
 			tabPanel.add(joinPage, "Join");
@@ -127,13 +191,43 @@ public class StanfordAssassins implements EntryPoint {
 		tabPanel.add(leaderboard, "Leader Board");
 		loadLeaderboard();
 		loadPlayerStats();
+		// Register the click listener with the tab panel, so that we can add the login.
+		// add it before selecting the tab, so it fires the event and we can add it to the history
+		tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
+			public void onSelection(SelectionEvent<Integer> event) {
+				onTabSelected(event.getSelectedItem());
+			}
+		});
 		tabPanel.selectTab(0);
 		
-		tabPanel.setWidth("600px");
+		tabPanel.setWidth("100%");
 
 		RootPanel.get(CONTENT).add(new Header(player.getName()));
 		RootPanel.get(CONTENT).add(tabPanel);
 		
+	}
+
+	private void onTabSelected(Integer selectedItem) {
+		if (selectedItem != null) {
+			Widget w = tabPanel.getWidget(selectedItem);
+			if (w == joinPage) {
+				History.newItem(HistoryTokens.Join.toString(), false);
+			} else if (w == leaderboard) {
+				History.newItem(HistoryTokens.Leaderboard.toString(), false);
+			} else if (w == myStats) {
+				History.newItem(HistoryTokens.MyStats.toString(), false);
+			} else {
+				// Check if it's a game page, if so, add the name of the game
+				if (w instanceof MyGame) {
+					MyGame g = (MyGame) w;
+					History.newItem(buildGameName(g.game), false);
+				}
+			}
+		}
+	}
+
+	private boolean shouldDisplayJoinPage(Player player) {
+		return player.getState() == PlayerState.NOTHING || player.getState() == PlayerState.WAITING;
 	}
 	
 	public void onJoin(final String alias) {
@@ -338,7 +432,30 @@ public class StanfordAssassins implements EntryPoint {
 		});
 	}
 	
+	public void like(final MyGame myGame, int assassinationId) {
+		request("cmd=" + ServerOperations.reportLike + "&assassinationId=" + assassinationId, new MyCallback() {
+			
+			public void onResponseReceived(Request request, Response response) {
+				if (200 == response.getStatusCode()) {
+					Reply reply = Reply.asReply(response.getText());
+					if (reply.getStatus() == ServerResults.OK) {
+						likeOK(myGame,reply.getNews());
+					}
+					else if (reply.getStatus() == ServerResults.ALREADY_LIKED) {
+						handleError(request);
+					}
+				} else {
+					handleError(request);
+				}
+			}
+		});
+	}
+	
 
+
+	private void likeOK(MyGame myGame,JsArray<News> news) {
+		myGame.updateNews(news);
+	}
 	
 	protected void playerStatsOK(PlayerStats stats) {
 		// Switch to the old page, and replace the stats
@@ -364,5 +481,15 @@ public class StanfordAssassins implements EntryPoint {
 	private void handleError(Request request) {
 		alertMessage("Server connection lost.");
 		System.err.println(request);
+	}
+
+	private Game findGameById(int gameId) throws Exception{
+		for (int i = 0; i < games.size(); i++) {
+			Game game = games.get(i);
+			if (game.getGameId() == gameId) {
+				return game;
+			}
+		}
+		throw new Exception("Requested a game that does not exist in collection");
 	}
 }

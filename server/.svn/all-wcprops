@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 29
-/svn/!svn/ver/49/trunk/server
+/svn/!svn/ver/54/trunk/server
 END
 make_game_deamon.php
 K 25
@@ -25,7 +25,7 @@ gameserver.php
 K 25
 svn:wc:ra_dav:version-url
 V 44
-/svn/!svn/ver/49/trunk/server/gameserver.php
+/svn/!svn/ver/54/trunk/server/gameserver.php
 END
 .htaccess
 K 25
@@ -37,7 +37,7 @@ rules.html
 K 25
 svn:wc:ra_dav:version-url
 V 40
-/svn/!svn/ver/47/trunk/server/rules.html
+/svn/!svn/ver/54/trunk/server/rules.html
 END
 login.php
 K 25

@@ -10,5 +10,10 @@ public enum ServerResults {
 	BAD_STATE,
 	BAD_CODEWORD,
 	// Returned every time something doesn't make sense for the server
-	INVALID;
+	INVALID,
+	/**
+	 * Returned when a player issues a like for an assassinationId that he allready likes
+	 */
+	ALREADY_LIKED
+	;
 }

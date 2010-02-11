@@ -6,6 +6,8 @@
 		.important {
 			font-weight: bold;
 		}
+		
+		
 	</ui:style>
 	<g:HTMLPanel>
 	<table>
