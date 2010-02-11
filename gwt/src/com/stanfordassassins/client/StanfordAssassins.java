@@ -46,8 +46,8 @@ public class StanfordAssassins implements EntryPoint {
 	}
 	
 	private static final Method METHOD = RequestBuilder.POST;
-//	public static String SERVER_URL = "http://stanfordassassins.com/gameserver.php";
-	public static String SERVER_URL = "http://localhost:8888/proxy";
+	public static String SERVER_URL = "http://stanfordassassins.com/gameserver.php";
+//	public static String SERVER_URL = "http://localhost:8888/proxy";
 
 	/**
 	 * ID for the content div in the ui.xml
@@ -71,6 +71,7 @@ public class StanfordAssassins implements EntryPoint {
 	
 	private LeaderBoard leaderboard;
 	private MyStats myStats ;
+	
 
 	/**
 	 * This is the entry point method.
@@ -184,6 +185,16 @@ public class StanfordAssassins implements EntryPoint {
 				gamesAdded++;
 			}
 		}
+		
+		// Finally, store all old games, so we can display them in the history
+		for (int i = 0; i < games.length(); i++) {
+			Game game = games.get(i);
+			if (!this.games.contains(game)) {
+				this.games.add(game);
+			}
+		}
+		
+		tabPanel.add(new GameHistory(this.games, this, news), "Game History");
 		
 		myStats = new MyStats();
 		tabPanel.add(myStats, "My Stats");
