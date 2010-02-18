@@ -1,19 +1,25 @@
 K 25
 svn:wc:ra_dav:version-url
 V 29
-/svn/!svn/ver/54/trunk/server
+/svn/!svn/ver/70/trunk/server
 END
 make_game_deamon.php
 K 25
 svn:wc:ra_dav:version-url
 V 50
-/svn/!svn/ver/49/trunk/server/make_game_deamon.php
+/svn/!svn/ver/70/trunk/server/make_game_deamon.php
+END
+logout.php
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/70/trunk/server/logout.php
 END
 emails.php
 K 25
 svn:wc:ra_dav:version-url
 V 40
-/svn/!svn/ver/49/trunk/server/emails.php
+/svn/!svn/ver/68/trunk/server/emails.php
 END
 db_login.php
 K 25
@@ -25,7 +31,13 @@ gameserver.php
 K 25
 svn:wc:ra_dav:version-url
 V 44
-/svn/!svn/ver/54/trunk/server/gameserver.php
+/svn/!svn/ver/66/trunk/server/gameserver.php
+END
+manage_game_deamon.php
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/70/trunk/server/manage_game_deamon.php
 END
 .htaccess
 K 25
@@ -43,5 +55,5 @@ login.php
 K 25
 svn:wc:ra_dav:version-url
 V 39
-/svn/!svn/ver/47/trunk/server/login.php
+/svn/!svn/ver/66/trunk/server/login.php
 END

@@ -5,8 +5,11 @@
 		.important {
 			font-weight: bold;
 		}
+		.spaced {
+			margin: 10px;
+		}
 	</ui:style>
-	<g:HTMLPanel>
+	<g:HTMLPanel addStyleNames="{style.spaced}">
 		Previous games:
 		<g:ListBox ui:field="oldGamesListBox"></g:ListBox>
 		<g:FlowPanel ui:field="gameContent">

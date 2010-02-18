@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -24,6 +25,7 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
@@ -40,23 +42,123 @@ public class LeaderBoard extends Composite {
 	}
 
 	@UiField
+	ListBox leaderboardOptionsListBox;
+	@UiField
+	FlexTable leaderboard;
+	@UiField
 	FlexTable leaderboardAssassinations;
 	@UiField
 	FlexTable leaderboardGamesPlayed;
 	@UiField
 	FlexTable leaderboardGamesWon;
+	@UiField
+	Label leaderboardTitle;
 	
-	public LeaderBoard() {
+	StanfordAssassins controller ;
+	
+	public LeaderBoard(StanfordAssassins controller) {
 		initWidget(uiBinder.createAndBindUi(this));
+		this.controller = controller;
 		
+		for (LeaderboardOption item : LeaderboardOption.values()) {
+			leaderboardOptionsListBox.addItem(item.toString(), item.name());
+		}
+		leaderboard.setVisible(true);
+		leaderboardAssassinations.setVisible(false);
+		leaderboardGamesPlayed.setVisible(false);
+		leaderboardGamesWon.setVisible(false);
+		leaderboardTitle.setText(LeaderboardOption.GENERAL.toString());
 	}
 	
-	public void update(JsArray<PlayerStats> stats){
-		updateAssassinations(stats);
-		updateGamesPlayed(stats);
-		updateGamesWon(stats);
+
+	@UiHandler("leaderboardOptionsListBox")
+	void onChange(ChangeEvent e) {
+		LeaderboardOption option = LeaderboardOption.valueOf(leaderboardOptionsListBox.getValue(leaderboardOptionsListBox.getSelectedIndex()));
+		leaderboardTitle.setText(option.toString());
+		switch(option){
+			case ASSASSINATIONS:
+				leaderboard.setVisible(false);
+				leaderboardAssassinations.setVisible(true);
+				leaderboardGamesPlayed.setVisible(false);
+				leaderboardGamesWon.setVisible(false);
+				break;
+			case GAMESPLAYED:
+				leaderboard.setVisible(false);
+				leaderboardAssassinations.setVisible(false);
+				leaderboardGamesPlayed.setVisible(true);
+				leaderboardGamesWon.setVisible(false);
+				break;
+			case GAMESWON:
+				leaderboard.setVisible(false);
+				leaderboardAssassinations.setVisible(false);
+				leaderboardGamesPlayed.setVisible(false);
+				leaderboardGamesWon.setVisible(true);
+				break;
+			case GENERAL:
+				leaderboard.setVisible(true);
+				leaderboardAssassinations.setVisible(false);
+				leaderboardGamesPlayed.setVisible(false);
+				leaderboardGamesWon.setVisible(false);
+				break;
+		}
 	}
-	private void updateAssassinations(JsArray<PlayerStats> stats) {
+	
+	
+	public void update(JsArray<PlayerStats> stats,int currentPlayerId){
+		updateLeaderBoard(stats,currentPlayerId);
+		updateAssassinations(stats,currentPlayerId);
+		updateGamesPlayed(stats,currentPlayerId);
+		updateGamesWon(stats,currentPlayerId);
+	}
+	private void updateLeaderBoard(JsArray<PlayerStats> stats,int currentPlayerId) {
+		leaderboard.clear();
+		List<PlayerStats> l = new ArrayList<PlayerStats>();
+		for (int i = 0; i< stats.length() ; i++) { 
+			l.add(stats.get(i));
+		}
+		Collections.sort(l,new Comparator<PlayerStats>() {
+			public int compare(PlayerStats o1, PlayerStats o2) {
+				if(leaderBoardScore(o1) < leaderBoardScore(o2)) return -1;
+				else if(leaderBoardScore(o1) == leaderBoardScore(o2)) return 0;
+				else return 1 ;
+			}
+		});
+		
+		int index = 0 ;
+		for (int i = 0; i< l.size() ; i++)  {
+			if (l.get(i).getPlayerId() == currentPlayerId) {
+				index = i ;
+				break;
+			}
+				
+		}
+		for (int i = 0; i< l.size() ; i++)  {
+			PlayerStats stat = l.get(i) ;
+			if (i>l.size()-10 || (i>index-10 && i<index+10))
+				addRowLeaderBoard(l.size() -i,stat.getName(),(float)Math.round(leaderBoardScore(stat)*100)/100,currentPlayerId == stat.getPlayerId());
+		}
+		leaderboard.insertRow(0);
+		HTML html = new HTML( "Rank") ;
+		html.getElement().setClassName("leaderBoardHeader");
+		leaderboard.setWidget(0, 0, html);
+		
+		html = new HTML( "Player Name");
+		html.getElement().setClassName("leaderBoardHeader");
+		leaderboard.setWidget(0, 1, html);
+		
+		html = new HTML("Score");
+		html.getElement().setClassName("leaderBoardHeader");
+		leaderboard.setWidget(0, 2, html);
+	}
+	
+	private float leaderBoardScore(PlayerStats stats){
+		if (stats.getGamesPlayed() == 0 )
+			return 0 ;
+		else
+			return ((float)stats.getAssassinations()/stats.getGamesPlayed())+((float)stats.getGamesWon()/stats.getGamesPlayed());
+	}
+	
+	private void updateAssassinations(JsArray<PlayerStats> stats,int currentPlayerId) {
 		leaderboardAssassinations.clear();
 		List<PlayerStats> l = new ArrayList<PlayerStats>();
 		for (int i = 0; i< stats.length() ; i++) { 
@@ -70,13 +172,35 @@ public class LeaderBoard extends Composite {
 			}
 		});
 		
+		int index = 0 ;
+		for (int i = 0; i< l.size() ; i++)  {
+			if (l.get(i).getPlayerId() == currentPlayerId) {
+				index = i ;
+				break;
+			}
+				
+		}
 		for (int i = 0; i< l.size() ; i++)  {
 			PlayerStats stat = l.get(i) ;
-			addRowAssassinations(l.size()-i,stat.getName(),stat.getAssassinations());
+			if (i>l.size()-10 || (i>index-10 && i<index+10))
+				addRowAssassinations(l.size()-i,stat.getName(),stat.getAssassinations(),currentPlayerId == stat.getPlayerId());
 		}
+		
+		leaderboardAssassinations.insertRow(0);
+		HTML html = new HTML( "Rank") ;
+		html.getElement().setClassName("leaderBoardHeader");
+		leaderboardAssassinations.setWidget(0, 0, html);
+		
+		html = new HTML( "Player Name");
+		html.getElement().setClassName("leaderBoardHeader");
+		leaderboardAssassinations.setWidget(0, 1, html);
+		
+		html = new HTML("Score");
+		html.getElement().setClassName("leaderBoardHeader");
+		leaderboardAssassinations.setWidget(0, 2, html);
 	}
 	
-	private void updateGamesPlayed(JsArray<PlayerStats> stats) {
+	private void updateGamesPlayed(JsArray<PlayerStats> stats, int currentPlayerId) {
 		leaderboardGamesPlayed.clear();
 		List<PlayerStats> l = new ArrayList<PlayerStats>();
 		for (int i = 0; i< stats.length() ; i++) { 
@@ -89,14 +213,34 @@ public class LeaderBoard extends Composite {
 				else return 1 ;
 			}
 		});
-		
+		int index = 0 ;
+		for (int i = 0; i< l.size() ; i++)  {
+			if (l.get(i).getPlayerId() == currentPlayerId) {
+				index = i ;
+				break;
+			}
+				
+		}
 		for (int i = 0; i< l.size() ; i++)  {
 			PlayerStats stat = l.get(i) ;
-			addRowGamesPlayed(l.size()-i,stat.getName(),stat.getGamesPlayed());
+			if (i>l.size()-10 || (i>index-10 && i<index+10))
+				addRowGamesPlayed(l.size()-i,stat.getName(),stat.getGamesPlayed(),currentPlayerId == stat.getPlayerId());
 		}
+		leaderboardGamesPlayed.insertRow(0);
+		HTML html = new HTML( "Rank") ;
+		html.getElement().setClassName("leaderBoardHeader");
+		leaderboardGamesPlayed.setWidget(0, 0, html);
+		
+		html = new HTML( "Player Name");
+		html.getElement().setClassName("leaderBoardHeader");
+		leaderboardGamesPlayed.setWidget(0, 1, html);
+		
+		html = new HTML("Score");
+		html.getElement().setClassName("leaderBoardHeader");
+		leaderboardGamesPlayed.setWidget(0, 2, html);
 	}
 	
-	private void updateGamesWon(JsArray<PlayerStats> stats) {
+	private void updateGamesWon(JsArray<PlayerStats> stats, int currentPlayerId) {
 		leaderboardGamesWon.clear();
 		List<PlayerStats> l = new ArrayList<PlayerStats>();
 		for (int i = 0; i< stats.length() ; i++) { 
@@ -109,66 +253,113 @@ public class LeaderBoard extends Composite {
 				else return 1 ;
 			}
 		});
-		
+		int index = 0 ;
+		for (int i = 0; i< l.size() ; i++)  {
+			if (l.get(i).getPlayerId() == currentPlayerId) {
+				index = i ;
+				break;
+			}
+				
+		}		
 		for (int i = 0; i< l.size() ; i++)  {
 			PlayerStats stat = l.get(i) ;
-			addRowGamesWon(l.size()-i,stat.getName(),stat.getGamesWon());
+			if (i>l.size()-10 || (i>index-10 && i<index+10))
+				addRowGamesWon(l.size()-i,stat.getName(),stat.getGamesWon(),currentPlayerId == stat.getPlayerId());
 		}
+		leaderboardGamesWon.insertRow(0);
+		HTML html = new HTML( "Rank") ;
+		html.getElement().setClassName("leaderBoardHeader");
+		leaderboardGamesWon.setWidget(0, 0, html);
+		
+		html = new HTML( "Player Name");
+		html.getElement().setClassName("leaderBoardHeader");
+		leaderboardGamesWon.setWidget(0, 1, html);
+		
+		html = new HTML("Score");
+		html.getElement().setClassName("leaderBoardHeader");
+		leaderboardGamesWon.setWidget(0, 2, html);
 	}
 	
-	private void addRowAssassinations(int rankingIndex,String player, int assassinations) {
-		leaderboardAssassinations.insertRow(0);
-		HTMLTable panel = new Grid(1,3);
-		panel.getElement().setClassName("leaderBoardRow");
-		
-		HTML html = new HTML( "<b>" + rankingIndex  +"</b>") ;
+	private void addRowLeaderBoard(int rankingIndex,String player, float score,boolean isCurrentUser) {
+		leaderboard.insertRow(0);
+		HTML html = new HTML( "" + rankingIndex  +"") ;
 		html.getElement().setClassName("leaderBoardRankingColumn");
-		panel.setWidget(0, 0,html);
+		if (isCurrentUser)
+			html.getElement().addClassName("currentUserleaderBoardRow"); 
+		leaderboard.setWidget(0, 0, html);
 		
-		html = new HTML( "<b>" + player +"</b>");
+		html = new HTML( "" + player);
 		html.getElement().setClassName("leaderBoardNameColumn");
-		panel.setWidget(0, 1,html);
+		if (isCurrentUser)
+			html.getElement().addClassName("currentUserleaderBoardRow"); 
+		leaderboard.setWidget(0, 1, html);
+		
+		html = new HTML(""+score);
+		html.getElement().setClassName("leaderBoardValueColumn");
+		if (isCurrentUser)
+			html.getElement().addClassName("currentUserleaderBoardRow"); 
+		leaderboard.setWidget(0, 2, html);
+	}
+	
+	private void addRowAssassinations(int rankingIndex,String player, int assassinations,boolean isCurrentUser) {
+		leaderboardAssassinations.insertRow(0);
+		HTML html = new HTML( "" + rankingIndex  +"") ;
+		html.getElement().setClassName("leaderBoardRankingColumn");
+		if (isCurrentUser)
+			html.getElement().addClassName("currentUserleaderBoardRow"); 
+		leaderboardAssassinations.setWidget(0, 0, html);
+		
+		html = new HTML( "" + player);
+		html.getElement().setClassName("leaderBoardNameColumn");
+		if (isCurrentUser)
+			html.getElement().addClassName("currentUserleaderBoardRow"); 
+		leaderboardAssassinations.setWidget(0, 1, html);
 		
 		html = new HTML(""+assassinations);
 		html.getElement().setClassName("leaderBoardValueColumn");
-		panel.setWidget(0, 2,html);
-		
-		leaderboardAssassinations.setWidget(0, 0, panel);
+		if (isCurrentUser)
+			html.getElement().addClassName("currentUserleaderBoardRow"); 
+		leaderboardAssassinations.setWidget(0, 2, html);
 	}
-	private void addRowGamesPlayed(int rankingIndex,String player, int gamesPlayed) {
+	private void addRowGamesPlayed(int rankingIndex,String player, int gamesPlayed,boolean isCurrentUser) {
 		leaderboardGamesPlayed.insertRow(0);
-		HTMLTable panel = new Grid(1,3);
-		panel.getElement().addClassName("leaderBoardRow");
 		
-		HTML html = new HTML( "<b>" + rankingIndex  +"</b>") ;
+		HTML html = new HTML( "" + rankingIndex  +"") ;
 		html.getElement().setClassName("leaderBoardRankingColumn");
-		panel.setWidget(0, 0,html);
+		if (isCurrentUser)
+			html.getElement().addClassName("currentUserleaderBoardRow"); 
+		leaderboardGamesPlayed.setWidget(0, 0, html);
 		
-		html = new HTML( "<b>" + player +"</b>");
+		html = new HTML( "" + player);
 		html.getElement().setClassName("leaderBoardNameColumn");
-		panel.setWidget(0, 1,html);
+		if (isCurrentUser)
+			html.getElement().addClassName("currentUserleaderBoardRow"); 
+		leaderboardGamesPlayed.setWidget(0, 1, html);
 		
 		html = new HTML(""+gamesPlayed);
 		html.getElement().setClassName("leaderBoardValueColumn");
-		panel.setWidget(0, 2,html);
-		leaderboardGamesPlayed.setWidget(0, 0, panel);
+		if (isCurrentUser)
+			html.getElement().addClassName("currentUserleaderBoardRow"); 
+		leaderboardGamesPlayed.setWidget(0, 2, html);
 	}
-	private void addRowGamesWon(int rankingIndex,String player, int gamesWon) {
+	private void addRowGamesWon(int rankingIndex,String player, int gamesWon,boolean isCurrentUser) {
 		leaderboardGamesWon.insertRow(0);
-		HTMLTable panel = new Grid(1,3);
-		panel.getElement().addClassName("leaderBoardRow");
-		
-		HTML html = new HTML( "<b>" + rankingIndex  +"</b>") ;
+		HTML html = new HTML( "" + rankingIndex  +"") ;
 		html.getElement().setClassName("leaderBoardRankingColumn");
-		panel.setWidget(0, 0,html);
+		if (isCurrentUser)
+			html.getElement().addClassName("currentUserleaderBoardRow"); 
+		leaderboardGamesWon.setWidget(0, 0, html);
 		
-		html = new HTML( "<b>" + player +"</b>");
+		html = new HTML( "" + player);
 		html.getElement().setClassName("leaderBoardNameColumn");
-		panel.setWidget(0, 1,html);
+		if (isCurrentUser)
+			html.getElement().addClassName("currentUserleaderBoardRow"); 
+		leaderboardGamesWon.setWidget(0, 1, html);
 		
 		html = new HTML(""+gamesWon);
 		html.getElement().setClassName("leaderBoardValueColumn");
-		panel.setWidget(0, 2,html);
-		leaderboardGamesWon.setWidget(0, 0, panel);
+		if (isCurrentUser)
+			html.getElement().addClassName("currentUserleaderBoardRow"); 
+		leaderboardGamesWon.setWidget(0, 2, html);
 	}
 }

@@ -11,7 +11,7 @@ public class Player extends JavaScriptObject {
 	}
 
 	public final native int getPlayerId() /*-{
-		return this.playerId;
+		return parseInt(this.playerId, 10);
 	}-*/;
 
 	public final native String getName() /*-{

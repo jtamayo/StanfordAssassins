@@ -1,11 +1,1 @@
-CREATE TABLE  `oguievet_assdev`.`likes` (
-`likeId` INT NOT NULL AUTO_INCREMENT ,
-`assassinationId` INT NOT NULL ,
-`playerId` INT NOT NULL ,
-PRIMARY KEY (  `likeId` )
-) ENGINE = MYISAM ;
-
-ALTER TABLE  `likes` ADD UNIQUE (
-`assassinationId` ,
-`playerId`
-);
+ALTER TABLE `participations` CHANGE `state` `state` ENUM( 'ACTIVE', 'ASSASSINATED', 'SUICIDE', 'WON', 'KICKED' ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL

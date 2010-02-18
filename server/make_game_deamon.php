@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 	$MIN_PALYERS_FOR_GAME = 3;
 

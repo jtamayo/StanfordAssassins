@@ -116,7 +116,6 @@
 			
 				<g:HTMLPanel ui:field="reportPanel">
 					<h3 class="{style.subheader}">Report an assassination</h3>
-					Enter the codeword of your victim and press report.
 					<g:HorizontalPanel spacing="5">
 					<g:TextBox ui:field="victimBox" addStyleNames="{style.reportBox}"/> 
 					<g:Button ui:field="reportKillButton" addStyleNames="{style.reportButton}">Report</g:Button>

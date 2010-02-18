@@ -16,13 +16,13 @@
 		}
 		
 		.sidebar {
-			background-color: #DC9;
+			background-color: #FFC;
 			vertical-align:top;
 			padding-left:	10px;
 			padding-right:	10px;
 			padding-top:	10px;
 			padding-bottom:	10px;
-			width:			25%; 
+			width:			27%; 
 		}
 		
 		.mainbar {
@@ -31,7 +31,7 @@
 			padding-top:	10px;
 			padding-bottom:	10px;
 			vertical-align:	top; 
-			width:			75%;
+			width:			73%;
 		}
 		
 		.reportBox {

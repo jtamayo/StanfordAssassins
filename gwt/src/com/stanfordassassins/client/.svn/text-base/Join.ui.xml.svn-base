@@ -2,22 +2,42 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style>
+		.aliasBox {
+			height:	32px;
+			font-size:	medium;
+			width: 300px;
+		}
+		.joinButton {
+			height: 32px;
+			font-size:	medium;
+		}
+		.signupPanel {
+			text-align: center;
+			margin-top: 20px;
+		}
+		.waitingPanel {
+			text-align: center;
+			margin-top: 20px;
+		}
 	</ui:style>
 	<g:FlowPanel>
-	<g:HTMLPanel ui:field="signupPanel">
+	<g:HTMLPanel ui:field="signupPanel" addStyleNames="{style.signupPanel}">
+		<h2>Join a game</h2>
 		<p>
-		Put me on the waiting list for the next game.
+		To join a game enter the alias with which you want to be identified during the game:
 		</p>
-		Alias: <g:TextBox ui:field="aliasBox"/> <g:Button ui:field="goButton" text="Go"/>
+		<g:TextBox ui:field="aliasBox" addStyleNames="{style.aliasBox}"/> <g:Button ui:field="goButton" text="Join" addStyleNames="{style.joinButton}"/>
 		<p>
 		Your alias is unique for each game, and it will be displayed in the news feed every time you assassinate a victim.
 		</p>
 	</g:HTMLPanel>
-	<g:HTMLPanel ui:field="waitingPanel">
+	<g:HTMLPanel ui:field="waitingPanel" addStyleNames="{style.waitingPanel}">
 		<h3>Waiting List</h3>
 		<p>
-		You're in the waiting list for a game of assassins with the alias <g:InlineLabel ui:field="aliasLabel"/>. You will receive an email as soon as
-		the game starts. Please note this might take up to 48 hours. 
+		You're in the waiting list for a game of assassins with the alias <g:InlineLabel ui:field="aliasLabel"/>. 
+		</p>
+		<p>
+		You will receive an email as soon as the game starts. Please note this might take some time. 
 		</p>
 		<p>
 		While you're waiting, 

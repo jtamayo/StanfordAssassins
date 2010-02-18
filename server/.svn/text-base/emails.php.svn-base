@@ -1,5 +1,44 @@
 <?php
+	function testEmail() {
+		$subject  = "This is a test";
+		$body = <<<END_OF_BODY
+<p>This is a link: <a href="http://stanfordassassins.com/?t=MyStats">Go to stats</a></p>
+
+<p>Hope it works</p>
+END_OF_BODY;
+		return sendHtmlEmail('vad@stanford.edu', $subject, $body);		
+	}
+	
+	function sendDeathmatch($email, $gameName, $otherPlayerName) {
+		$gameTag = str_replace(' ', '', $gameName);
+		$subject  = "IT'S ON!";
+		$body = <<<END_OF_BODY
+<p>You and $otherPlayerName are the last two players in $gameName.</p>
+
+<p>Whoever assassinates the other wins this game.</p>
+
+<p>You both have 96 hours.</p>
+
+<p>Go to the <a href="http://stanfordassassins.com/?t=$gameTag">game page</a>.</p>
+END_OF_BODY;
+		return sendHtmlEmail($email, $subject, $body);		
+	}
+	
+	function sendTimeOut($email, $gameName) {
+		$gameTag = str_replace(' ', '', $gameName);
+		$subject  = "You have been removed from $gameName";
+		$body = <<<END_OF_BODY
+<p>Your time to make an assassination has ended.</p>
+
+<p>You are no longer playing in $gameName, but you can still <a href="http://stanfordassassins.com/?t=$gameTag">spectate it</a>.</p>
+
+<p>To participate in a new game, go to the <a href="http://stanfordassassins.com/?t=Join">join page</a>.</p>
+END_OF_BODY;
+		return sendHtmlEmail($email, $subject, $body);		
+	}
+
 	function sendGameStarted($email, $gameId, $gameName, $codeword, $targetAlias, $targetName) {
+		$gameTag = str_replace(' ', '', $gameName);
 		$subject  = "$gameName has started";
 		$body = <<<END_OF_BODY
 <p>$gameName has begun.</p>
@@ -8,9 +47,9 @@
 
 <p>Your target for now is $targetName ($targetAlias). You have 96 hours to complete and report the assassination.</p>
 
-<p>The guild should not need to remind you to stay within the rules at all times. You can view the rules here: http://stanfordassassins.com/rules.html</p>
+<p>The guild should not need to remind you to stay within the rules at all times. You can view the rules <a href="http://stanfordassassins.com/rules.html">here</a></p>
 
-<p>To go to the game page click here: http://stanfordassassins.com</p>
+<p>Go to the <a href="http://stanfordassassins.com/?t=$gameTag">game page</a>.</p>
 
 <p>Remember, someone out there is out to get you so trust no one.</p>
 
@@ -20,6 +59,7 @@ END_OF_BODY;
 	}
 	
 	function sendBeenAssassinated($email, $assassinAlias, $assassinName, $details) {
+		$gameTag = str_replace(' ', '', $gameName);
 		$subject  = 'You have been assassinated';
 		$body = <<<END_OF_BODY
 <p>You have been assassinated by $assassinName (aka $assassinAlias).</p>
@@ -28,7 +68,9 @@ END_OF_BODY;
 
 <p>Let’s hope that you can learn from this.</p>
 
-<p>To join the next game, go to: http://stanfordassassins.com</p>
+<p>You can still <a href="http://stanfordassassins.com/?t=$gameTag">spectate $gameName</a>.</p>
+
+<p>To participate in a new game, go to the <a href="http://stanfordassassins.com/?t=Join">join page</a>.</p>
 
 <p>Better luck next time.</p>
 END_OF_BODY;
@@ -36,7 +78,7 @@ END_OF_BODY;
 	}
 
 	function sendAssassinIsOut($email, $assassinAlias, $assassinName, $details) {
-		$subject  = 'Someone else is after you';
+		$subject  = "Someone else is after you";
 		$body = <<<END_OF_BODY
 <p>Your assassin, $assassinName (aka $assassinAlias), is out of the game.</p>
 
@@ -48,23 +90,35 @@ END_OF_BODY;
 	}
 	
 	
-	function sendTargetChanged($email, $gameId, $targetAlias, $targetName) {
-		$subject  = 'Your target has changed';
+	function sendTargetChanged($email, $gameName, $targetAlias, $targetName) {
+		$gameTag = str_replace(' ', '', $gameName);
+		$subject  = "Your target has changed";
 		$body = <<<END_OF_BODY
 <p>Your new target is $targetName (who goes by the alias of $targetAlias). The assassination timer has been reset to 96 hours.</p>
 
-<p>The guild should not need to remind you to stay within the rules at all times. (http://stanfordassassins.com/rules.html)</p>
+<p>The guild should not need to remind you to stay within <a href="http://stanfordassassins.com/rules.html">the rules</a> at all times.</p>
 
-<p>To go to your game page click here: http://stanfordassassins.com</p>
+<p>Go to the <a href="http://stanfordassassins.com/?t=$gameTag">game page</a>.</p>
 END_OF_BODY;
 		return sendHtmlEmail($email, $subject, $body);
 	}
 	
-	function sendGameOver($email, $gameId, $gameName, $winnerAlias, $winnerName) {
+	function sendGameOver($email, $gameId, $gameName, $winnerAlias='', $winnerName='') {
+		$gameTag = str_replace(' ', '', $gameName);
 		$subject  = "$gameName has ended";
-		$body = <<<END_OF_BODY
-<p>$gameName has been won by $winnerName ($winnerAlias).</p>
+		if($winnerAlias=='') {
+			$body = <<<END_OF_BODY
+<p>$gameName has ended without a winner.</p>
+
+<p>Go to the <a href="http://stanfordassassins.com/?t=$gameTag">game page</a>.</p>
 END_OF_BODY;
+		} else {
+			$body = <<<END_OF_BODY
+<p>$gameName has been won by $winnerName ($winnerAlias).</p>
+
+<p>Go to the <a href="http://stanfordassassins.com/?t=$gameTag">game page</a>.</p>
+END_OF_BODY;
+		}
 		return sendHtmlEmail($email, $subject, $body);
 	}
 	
@@ -72,6 +126,10 @@ END_OF_BODY;
 		$subject  = "You won $gameName";
 		$body = <<<END_OF_BODY
 <p>Congratulations on winning $gameName!</p>
+
+<p>Go to the <a href="http://stanfordassassins.com/?t=$gameTag">game page</a>.</p>
+
+<p>To participate in a new game, go to the <a href="http://stanfordassassins.com/?t=Join">join page</a>.</p>
 END_OF_BODY;
 		return sendHtmlEmail($email, $subject, $body);
 	}
@@ -131,6 +189,15 @@ END_OF_BODY;
 	</body>
 </html>
 END_OF_EMAIL;
-		return mail($email, $subject, $message, $headers);
+		if(strstr($email, 'test.edu') === false) {
+			return mail($email, $subject, $message, $headers);
+		} else {
+			echo "==== START SEND EMAIL =====================\n";
+			echo "TO: $email\n";
+			echo "SUBJECT: $subject\n";
+			echo "$body\n";
+			echo "===== END SEND EMAIL ======================\n";
+			return true;
+		}
 	}
 ?>

@@ -81,25 +81,33 @@ h2 {
   margin: 15px 6px 6px;
 }
 
-.leaderBoardRow {
-	width: 233px;
-	cellspacing:0 ;
-	cellpadding:0 ;
-}
+
 .leaderBoardRankingColumn{
- 	font-style italic ;
+ 	font-style: italic ;
  	text-align:left;
- 	width: 33px;
+ 	width: 100%;
+ 	
 }
 .leaderBoardNameColumn{
- 	font-weight bold ;
  	text-align: left;
- 	width: 165px;
+ 	width: 280px;
  	padding-right: 5px;
 }
 .leaderBoardValueColumn{
  	text-align:left;
- 	width: 20px;
+ 	width: 100%;
+ 	font-weight: bold;
+}
+
+.leaderBoardHeader{
+	font-weight: bold;
+}
+
+.currentUserleaderBoardRow{
+	background-color: #C41E3A;
+	background-image: url(images/red_header_bg.jpg);
+	background-repeat: repeat-x;
+	color: white;
 }
 
 .dialogOKButton {
@@ -112,6 +120,11 @@ h2 {
 	}
 .newsFeedBox {
 	width: 100%;
+}
+
+.gwt-TextBox-watermark {
+	font-style: italic;
+	color: DarkGray;
 }
 /* DEBUG */
 

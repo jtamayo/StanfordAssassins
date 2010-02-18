@@ -30,7 +30,7 @@ public class ProxyServlet extends HttpServlet {
 		ServletInputStream requestInput = req.getInputStream();
 		
 //		URI uri = URI.create("http://stanfordassassins.com/gameserver.php" + (query != null ?("?" +  query) : ""));
-		URI uri = URI.create("http://stanfordassassins.com/dev/gameserver.php?debug=1" + (query != null ? ("&" +  query) : ""));
+		URI uri = URI.create("http://stanfordassassins.com/dev/gameserver.php?debug=2" + (query != null ? ("&" +  query) : ""));
 		
 		URLConnection conn = uri.toURL().openConnection();
 		conn.setDoOutput(true);

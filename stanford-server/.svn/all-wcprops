@@ -1,13 +1,13 @@
 K 25
 svn:wc:ra_dav:version-url
 V 38
-/svn/!svn/ver/54/trunk/stanford-server
+/svn/!svn/ver/66/trunk/stanford-server
 END
 WebAuth.php
 K 25
 svn:wc:ra_dav:version-url
 V 50
-/svn/!svn/ver/54/trunk/stanford-server/WebAuth.php
+/svn/!svn/ver/66/trunk/stanford-server/WebAuth.php
 END
 htaccess
 K 25

@@ -25,6 +25,8 @@ public class Join extends Composite {
 
 	interface JoinUiBinder extends UiBinder<Widget, Join> {
 	}
+	
+	private static String boxWatermark = "Alias for this game";
 
 	@UiField
 	Button goButton;
@@ -44,6 +46,10 @@ public class Join extends Composite {
 
 		this.controller = contoller;
 		updatePlayer(player);
+		
+		TextBox box = aliasBox;
+		Watermark.addWatermark(box, boxWatermark);
+		
 	}
 
 	@UiHandler("goButton")
@@ -52,6 +58,8 @@ public class Join extends Composite {
 	}
 
 	public void updatePlayer(Player player) {
+//		signupPanel.setVisible(true);
+//		waitingPanel.setVisible(false);
 		if (player.getState() == PlayerState.NOTHING) {
 			signupPanel.setVisible(true);
 			waitingPanel.setVisible(false);

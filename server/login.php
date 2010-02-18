@@ -1,4 +1,15 @@
 <?php
+session_start();
+if($_SESSION['playerId']) {
+	if(isset($_GET['t'])) {
+		$tag = '#' . $_GET['t'];
+	} else {
+		$tag = '';
+	}
+	header("Location: StanfordAssassins.html$tag");
+	exit;
+}
+
 if(isset($_GET['r'])) {
     $encrypt = $_GET['r'];
     $fail = false;
@@ -91,9 +102,14 @@ if($fail === false) {
 
 // create session
 if($fail === false) {
-	session_start();
+	//session_start();
 	$_SESSION['playerId'] = intval($playerId);
-	header("Location: http://stanfordassassins.com/StanfordAssassins.html");
+	header("Location: StanfordAssassins.html");
+} else if(isset($_GET['demo'])) {
+	// login to the demo user
+	//session_start();
+	$_SESSION['playerId'] = 3;
+	header("Location: StanfordAssassins.html");
 } else {
 ?>
 <html>
@@ -118,7 +134,7 @@ if($fail === false) {
 <body style="text-align: center; padding-top: 200px;">
 	<h1>Stanford Assassins</h1>
 	<br/>
-	<a href="http://webauth.stanfordassassins.com">Login with WebAuth</a>
+	<a href="http://webauth.stanfordassassins.com<?= isset($_GET['t'])?('?t=' . $_GET['t']):'' ?>">Login with WebAuth</a>
 	<!-- FAIL: <?= $fail ?> -->
 </body>
 </html>

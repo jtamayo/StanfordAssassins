@@ -198,7 +198,7 @@ public class StanfordAssassins implements EntryPoint {
 		
 		myStats = new MyStats();
 		tabPanel.add(myStats, "My Stats");
-		leaderboard = new LeaderBoard();
+		leaderboard = new LeaderBoard(this);
 		tabPanel.add(leaderboard, "Leader Board");
 		loadLeaderboard();
 		loadPlayerStats();
@@ -209,7 +209,10 @@ public class StanfordAssassins implements EntryPoint {
 				onTabSelected(event.getSelectedItem());
 			}
 		});
+		
+		String initialToken = History.getToken();
 		tabPanel.selectTab(0);
+		onHistoryChange(initialToken);
 		
 		tabPanel.setWidth("100%");
 
@@ -319,7 +322,7 @@ public class StanfordAssassins implements EntryPoint {
 	
 	protected void leaderboardOK(JsArray<PlayerStats> stats) {
 		// Switch to the old page, and replace the stats
-		leaderboard.update(stats);
+		leaderboard.update(stats,player.getPlayerId());
 	}
 
 	

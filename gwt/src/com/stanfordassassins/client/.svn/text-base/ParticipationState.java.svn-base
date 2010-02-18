@@ -6,5 +6,5 @@ package com.stanfordassassins.client;
  * @author juanmtamayo
  */
 public enum ParticipationState {
-	ACTIVE, ASSASSINATED, SUICIDE, WON;
+	ACTIVE, ASSASSINATED, SUICIDE, WON, KICKED;
 }

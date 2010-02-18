@@ -3,37 +3,117 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style>
 		/* Add CSS here. See the GWT docs on UI Binder for more details */
-		.important {
+		.alias {	
+			font-size: 18px;
+			font-weight: bold;
+			color: #333;
+		}
+		
+		.codeword {
+			font-size: 18px;
+			font-weight:	bold;
+			color: #F11;
+		}
+		
+		.sidebar {
+			background-color: #FFC;
+			vertical-align:top;
+			padding-left:	10px;
+			padding-right:	10px;
+			padding-top:	10px;
+			padding-bottom:	10px;
+			width:			25%; 
+		}
+		
+		.mainbar {
+			padding-left:	10px;
+			padding-right:	10px;
+			padding-top:	10px;
+			padding-bottom:	10px;
+			vertical-align:	top; 
+			width:			75%;
+		}
+		
+		.reportBox {
+			height:	32px;
+			font-size:	medium;
+			width: 300px;
+		}
+		.reportButton {
+			height: 32px;
+			font-size:	medium;
+		}
+		
+		.disputeAnchor {
+			font-size:	x-small;
+		}
+		
+		.subheader {
+			margin-top:	0px;
+			margin-bottom:	8px;
 			font-weight: bold;
 		}
 		
+		.table {
+			border-collapse: collapse;
+		}
 		
+		.gameInfo {
+			font-weight: bold;
+			padding-left: 8px;
+		}
+		
+		.gameInfoLabel {
+		}
+		
+		.statsRow{
+			
+		}
+		
+		.statsNoColumn{
+			text-align: center ;
+		}
+		
+		.statsTable{
+			border: 1px solid black ;
+		}
+		
+		.leaderboardTable{
+			width: 250px ;
+			cellspacing:0 ;
+			cellpadding:0 ;
+			border-collapse: collapse;
+		}
+		.leaderboardTable td{
+			border: 1px solid black ;
+			font-size: 16px;
+		}
+		.leaderBoardTitle{
+			font-size: 16px;
+			font-weight: bold;
+			margin-bottom: 20px ;
+			margin-top: 20px;
+			
+		}
 	</ui:style>
 	<g:HTMLPanel>
-	<table>
+		View LeaderBoard by:
+		<g:ListBox ui:field="leaderboardOptionsListBox"></g:ListBox>
+		<table cellspacing="0" cellpadding="0" addStyleNames="{style.table}">
 		<tr>
-		<td>
-				<u>Assassinations</u>
-		</td>
-		<td>
-				<u>Games Played</u>
-		</td>
-		<td>
-				<u>Games Won</u>
-		</td>
-		</tr>
-		<tr>
-		<td>
-			
-				<g:FlexTable ui:field="leaderboardAssassinations" />
-		</td>
-		<td>
-				<g:FlexTable ui:field="leaderboardGamesPlayed" />
-		</td>
-		<td>
-				<g:FlexTable ui:field="leaderboardGamesWon" />
-		</td>
+			<td class="{style.sidebar}">
+				
+			</td>
+			<td class="{style.mainbar}">
+				<g:Label ui:field="leaderboardTitle" addStyleNames="{style.leaderBoardTitle}" />
+				<g:FlexTable ui:field="leaderboard" addStyleNames="{style.leaderboardTable}" />
+				<g:FlexTable ui:field="leaderboardAssassinations" addStyleNames="{style.leaderboardTable}" />
+				<g:FlexTable ui:field="leaderboardGamesPlayed" addStyleNames="{style.leaderboardTable}" />
+				<g:FlexTable ui:field="leaderboardGamesWon" addStyleNames="{style.leaderboardTable}" />
+			</td>
 		</tr>
 	</table>
+	
 	</g:HTMLPanel>
+	
 </ui:UiBinder> 

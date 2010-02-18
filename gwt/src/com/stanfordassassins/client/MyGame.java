@@ -82,6 +82,8 @@ public class MyGame extends Composite {
 		this.controller = controller;
 
 		updateGame(game);
+		
+		Watermark.addWatermark(victimBox, "Enter your victim's codeword");
 
 		Timer timer = new Timer() {
 			@Override
@@ -119,6 +121,11 @@ public class MyGame extends Composite {
 			} else if (game.getParticipationState() == ParticipationState.ASSASSINATED) {
 				// Write "game over"
 				myGameContentPanel.addAndReplaceElement(new HTML("<h2>Game Over</h2> You've been assassinated, but you can still monitor the progress of the game in the game news."), "statusText");
+				reportPanel.setVisible(false);
+				gameInfoPanel.setVisible(false);
+			} else if (game.getParticipationState() == ParticipationState.KICKED) {
+				// Write "game over"
+				myGameContentPanel.addAndReplaceElement(new HTML("<h2>Game Over</h2> You have failed to make an assassination in time, and you have been removed from this game."), "statusText");
 				reportPanel.setVisible(false);
 				gameInfoPanel.setVisible(false);
 			}
@@ -164,7 +171,7 @@ public class MyGame extends Composite {
 		newsFeed.setWidget(2, 0,likePanel);  
 		
 		if (details != null && !"".equals(details)) {
-			newsFeed.setWidget(1, 0,new Label("According to " + killer + ", " + details));  		
+			newsFeed.setWidget(1, 0,new Label(details));  		
 		} else {
 			newsFeed.setWidget(1, 0,new Label(""));  
 		}

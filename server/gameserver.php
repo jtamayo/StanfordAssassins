@@ -56,6 +56,16 @@
 		}
 		break;
 		
+	case 'reportLike':
+		if($invalidArg === false) {
+			$assassinationId = arg('assassinationId');
+			if($assassinationId === false) $invalidArg = 'assassinationId';
+		}
+		if($invalidArg === false) {
+			reportLike($playerId, $assassinationId);
+		}
+		break;
+		
 	case 'addDetails':
 		if($invalidArg === false) {
 			$assassinationId = arg('assassinationId');
@@ -94,6 +104,11 @@
 		
 	case 'info':
 		phpinfo();
+		break;
+		
+	case 'testEmail':
+		require_once("emails.php");
+		testEmail();
 		break;
 		
 	default:
@@ -180,8 +195,7 @@
 	}
 	
 	function reportError($playerId, $error) {
-		global $HTTP_RAW_POST_DATA;
-		global $_SERVER;
+		if($playerId < 10) return; //  don't bother for the test users
 		require_once('db_login.php');
 		
 		$date = gmdate("Y-m-d H:i:s");
@@ -337,6 +351,8 @@
 	}
 	
 	function reportLike($playerId, $assassinationId) {
+		require_once('db_login.php');
+		
 		$sql = "SELECT likeId FROM likes WHERE assassinationId='$assassinationId' AND playerId='$playerId' LIMIT 1;";
 		$result = mysql_query($sql) or sql_error_report($sql);
 		if($row = mysql_fetch_assoc($result)) {
@@ -348,11 +364,27 @@
 			return;
 		}
 		
+		// pull out the gameId out of the assassination
+		$sql = "SELECT gameId FROM assassinations WHERE assassinationId='$assassinationId' LIMIT 1;";
+		$result = mysql_query($sql) or sql_error_report($sql);
+		if($row = mysql_fetch_assoc($result)) {
+			$gameId = $row['gameId'];
+		} else {
+			$ret = array(
+				"status" => "BAD_ASSASSINATION"
+			);
+			
+			print json_encode($ret);
+			return;
+		}
+		
+		// Add the like
 		$sql = "INSERT INTO likes (assassinationId, playerId) VALUES ('$assassinationId', '$playerId');";
 		mysql_query($sql) or sql_error_report($sql);
 		
 		$ret = array(
-			"status" => "OK"
+			"status" => "OK",
+			"news" => getNews($playerId, $gameId)
 		);
 		
 		print json_encode($ret);
@@ -459,7 +491,7 @@
 		}
 	}
 	
-	function getNews($playerId) {
+	function getNews($playerId, $gameId=false) {
 		require_once('db_login.php');
 		
 		$news = array();
@@ -473,7 +505,7 @@
 		$sql .= "INNER JOIN participations AS assassinPart ON assassinations.gameId = assassinPart.gameId AND assassinations.assassinId = assassinPart.playerId ";
 		$sql .= "INNER JOIN participations AS targetPart ON assassinations.gameId = targetPart.gameId AND assassinations.victimId = targetPart.playerId ";
 		$sql .= "INNER JOIN players AS targetPlayer ON assassinations.victimId = targetPlayer.playerId ";
-		$sql .= "WHERE playerPart.playerId = '$playerId' AND assassinations.state = 'SUCCESS' AND (assassinations.details != '#' OR assassinations.endDate < '$twoMinAgo') ORDER BY assassinations.endDate DESC;";
+		$sql .= "WHERE playerPart.playerId = '$playerId' AND assassinations.state = 'SUCCESS' AND (assassinations.details != '#' OR assassinations.endDate < '$twoMinAgo')" . ($gameId===false?'':" AND assassinations.gameId = '$gameId'") . " ORDER BY assassinations.endDate DESC;";
 		$result = mysql_query($sql) or sql_error_report($sql);
 		while($row = mysql_fetch_assoc($result)) {
 			$new = array(
