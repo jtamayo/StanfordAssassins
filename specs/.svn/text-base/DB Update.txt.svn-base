@@ -1,1 +1,33 @@
-ALTER TABLE `participations` CHANGE `state` `state` ENUM( 'ACTIVE', 'ASSASSINATED', 'SUICIDE', 'WON', 'KICKED' ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL
+CREATE TABLE  `oguievet_assdev`.`disputes` (
+`disputeId` INT NOT NULL AUTO_INCREMENT ,
+`gameId` INT NOT NULL ,
+`accuserId` INT NOT NULL ,
+`defendantId` INT NOT NULL ,
+`status` ENUM(  'CREATED',  'REBUTED',  'RESOLVED_ASS',  'RESOLVED_DEF' ) NOT NULL DEFAULT  'CREATED',
+`accusation` VARCHAR( 10000 ) NOT NULL ,
+`defense` VARCHAR( 10000 ) NOT NULL ,
+`createdTime` DATETIME NOT NULL DEFAULT  '0000-00-00 00:00:00',
+`rebutedTime` DATETIME NOT NULL DEFAULT  '0000-00-00 00:00:00',
+`resolvedTime` DATETIME NOT NULL DEFAULT  '0000-00-00 00:00:00',
+PRIMARY KEY (  `disputeId` )
+) ENGINE = MYISAM CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+
+ALTER TABLE  `disputes` ADD UNIQUE (
+`gameId` ,
+`accuserId` ,
+`defendantId`
+);
+
+ALTER TABLE  `participations` ADD  `disputes` INT NOT NULL DEFAULT  '0';
+
+ALTER TABLE  `disputes` ADD  `won` ENUM(  'ACC',  'DEF' ) NOT NULL DEFAULT  'DEF' AFTER  `defendantId`;
+
+ALTER TABLE  `disputes` CHANGE  `status`  `status` ENUM(  'CREATED',  'REBUTED',  'RESOLVED_ACC',  'RESOLVED_DEF' ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT  'CREATED';
+
+
+ALTER TABLE  `assassinations` ADD  `detailsState` ENUM(  'NONE',  'ADDED',  'TIMEOUT' ) NOT NULL DEFAULT  'NONE' ;
+
+UPDATE `assassinations` SET details='', detailsState='TIMEOUT' WHERE details='#' AND detailsState='NONE' ;
+UPDATE `assassinations` SET detailsState='ADDED' WHERE detailsState='NONE' ;
+UPDATE `assassinations` SET detailsState='NONE' WHERE state != 'SUCCESS' ;

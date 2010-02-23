@@ -1,9 +1,10 @@
 #!/usr/bin/php
 <?php
-	$MIN_PALYERS_FOR_GAME = 3;
+	$MIN_PALYERS_FOR_GAME = 4;
 
 	header('Content-Type: text/plain; charset=utf-8');
 	
+	require_once('common.php');
 	require_once('db_login.php');
 	$debug = true;
 	
@@ -36,10 +37,9 @@
 	function startGame($gameId, $gameName, $players) {
 		$playerNumber = count($players);
 		if($playerNumber < 3) return;
-		require_once('emails.php');
-		
-		$date = gmdate("Y-m-d H:i:s");
-		$dateLimit = gmdate("Y-m-d H:i:s", time()+96*60*60);
+				
+		$date = getDate();
+		$dateLimit = getDateLimit();
 		$codewords = array('age','air','anger','animal','answer','apple','area','arm','art','atom','baby','back','ball','band','bank','bar','base','bat','bear','beauty','bell','bird','bit','block','blood','blow','board','boat','body','bone','book','bottom','box','boy','branch','bread','break','brother','call','camp','capital','captain','car');
 		shuffle($codewords);
 		
@@ -50,18 +50,16 @@
 		// Randomize the players
 		shuffle($players);
 		$playerNameMap = array();
-		$playerEmailMap = array();
 		$playerAliasMap = array();
 		$playerCodewordMap = array();
 		
 		$playerList = join(',', $players);
 		$participationList = '';
-		$sql = "SELECT playerId, name, email, waitingAlias FROM players WHERE state='WAITING' AND playerId IN ($playerList);";
+		$sql = "SELECT playerId, name, waitingAlias FROM players WHERE state='WAITING' AND playerId IN ($playerList);";
 		$result = mysql_query($sql) or sql_error_report($sql);
 		while($row = mysql_fetch_assoc($result)) {
 			$playerId = $row['playerId'];
 			$playerNameMap[$playerId] = addslashes($row['name']);
-			$playerEmailMap[$playerId] = addslashes($row['email']);
 			$playerAliasMap[$playerId] = addslashes($row['waitingAlias']);
 			$playerCodewordMap[$playerId] = addslashes(array_pop($codewords));
 			
@@ -81,8 +79,7 @@
 			$playerId = $players[$i];
 			$victimId = $players[($i+1)%$playerNumber];
 			
-			trace("Sending email to $playerNameMap[$playerId]");
-			sendGameStarted($playerEmailMap[$playerId], $gameId, $gameName, $playerCodewordMap[$playerId], $playerAliasMap[$victimId], $playerNameMap[$victimId]);
+			trace("Starting player $playerNameMap[$playerId]");
 			
 			if($assassinationList != '') $assassinationList .= ', ';
 			$assassinationList .= "('$gameId', '$playerId', '$victimId', 'PENDING', '$date', '$dateLimit')";
@@ -100,10 +97,8 @@
 		if($debug) echo "$str\n";
 	}
 	
-	function sql_error_report($sql) {
-		require_once('db_login.php');
-		
-		$date = gmdate("Y-m-d H:i:s");
+	function sql_error_report($sql) {		
+		$date = getDate();
 		$sqlError = mysql_error();
 		mysql_query(sprintf("INSERT INTO errors (type, error, extra, date) VALUES ('SQL', '%s', 'make_game_deamon:%s', '%s');", addslashes($sqlError), addslashes($sql), $date));
 		die($sqlError . "\n" . $sql);

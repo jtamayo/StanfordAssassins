@@ -1,0 +1,50 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:style>
+		/* Add CSS here. See the GWT docs on UI Binder for more details */
+		.important {
+			font-weight: bold;
+		}
+		.buttonPanel {
+			margin-top: 10px;
+		}
+		.mainPanel {
+			margin: 10px;
+		}
+	</ui:style>
+	<g:HTMLPanel addStyleNames="{style.mainPanel}">
+		<p>
+		You are about to initiate a dispute against your <g:InlineLabel ui:field="againstLabel1" addStyleNames="{style.important}"/>. A dispute
+		is meant for cases when you've spoken with your <g:InlineLabel ui:field="againstLabel2" />, but you couldn't reach an 
+		agreement about who died.
+		</p>
+		<p>
+		The game engine will solve the dispute at random, but your chances of winning the 
+		dispute depend on how many disputes you have been involved in this game. The more
+		disputes you've been involved in, the less likely you are to win.
+		</p>
+		<p>
+		Also, if you win the dispute but it is later found to be unfair, <em>you will be assassinated</em>.
+		</p>
+		<p>
+		Enter here the reason for the dispute. This will be your only defense if your <g:InlineLabel ui:field="againstLabel3" />
+		were to challenge your dispute:
+		</p>
+		<g:TextArea ui:field="reasonBox" width="100%" visibleLines="4">
+		</g:TextArea>
+		
+		<p>
+		Type the following into the box below: <g:InlineLabel ui:field="acknowledgeText" addStyleNames="{style.important}"/> .
+		</p>
+		
+		<g:TextBox ui:field="acknowledgeBox" width="100%"></g:TextBox>
+
+		<g:VerticalPanel ui:field="fPanel" width="100%">
+			<g:HorizontalPanel ui:field="buttonPanel" addStyleNames="{style.buttonPanel}">
+				<g:Button ui:field="cancelButton">Cancel</g:Button>
+				<g:Button ui:field="submitButton">Submit</g:Button>
+			</g:HorizontalPanel>
+		</g:VerticalPanel>
+	</g:HTMLPanel>
+</ui:UiBinder> 

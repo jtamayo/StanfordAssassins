@@ -20,6 +20,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.http.client.RequestBuilder.Method;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -46,8 +47,8 @@ public class StanfordAssassins implements EntryPoint {
 	}
 	
 	private static final Method METHOD = RequestBuilder.POST;
-	public static String SERVER_URL = "http://stanfordassassins.com/gameserver.php";
-//	public static String SERVER_URL = "http://localhost:8888/proxy";
+//	public static String SERVER_URL = "../gameserver.php";
+	public static String SERVER_URL = "http://localhost:8888/proxy";
 
 	/**
 	 * ID for the content div in the ui.xml
@@ -291,16 +292,8 @@ public class StanfordAssassins implements EntryPoint {
 		panel.addStyleName("dialogVPanel");
 		HTML w = new HTML(text);
 		w.setWidth("400px");
-//		w.setWidth("20 0px");
-//		w.setWidth("100%");
 		panel.add(w);
 		panel.add(okButton);
-//		VerticalPanel dialogVPanel = new VerticalPanel();
-//		dialogVPanel.addStyleName("dialogVPanel");
-////		dialogVPanel.add(new HTML(text));
-//		dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
-//		dialogVPanel.add(okButton);
-//		dialogBox.setWidget(dialogVPanel);
 		dialogBox.setWidget(panel);
 		
 		// Add a handler to close the DialogBox
@@ -326,7 +319,7 @@ public class StanfordAssassins implements EntryPoint {
 	}
 
 	
-	final native void redirect(String url)
+	final native static void redirect(String url)
 	/*-{
 		$wnd.location.replace(url);
 	}-*/;
@@ -497,13 +490,53 @@ public class StanfordAssassins implements EntryPoint {
 		System.err.println(request);
 	}
 
-	private Game findGameById(int gameId) throws Exception{
-		for (int i = 0; i < games.size(); i++) {
-			Game game = games.get(i);
-			if (game.getGameId() == gameId) {
-				return game;
+	public void submitDispute(String reason, final DisputeAgainst against, final MyGame gamePage, final DialogBox dialogBox) {
+		String data = "cmd=" + ServerOperations.startDispute;
+		data += "&against="  + (against == DisputeAgainst.TARGET ? "TAR" : "ASS");
+		data += "&description=" + reason;
+		data += "&gameId=" + gamePage.game.getGameId();
+		request(data , new MyCallback() {
+			
+			public void onResponseReceived(Request request, Response response) {
+				dialogBox.hide();
+				if (200 == response.getStatusCode()) {
+					Reply reply = Reply.asReply(response.getText());
+					if (reply.getStatus() == ServerResults.OK) {
+						disputeOK(reply.getDisputeResult(), reply.getGame(), gamePage);
+					} else if (reply.getStatus() == ServerResults.DISPUTE_EXISTS) {
+						Window.alert("You have already created a dispute against your current " + 
+								(against == DisputeAgainst.TARGET ? "target" : "assassin") + ".");
+					} else if (reply.getStatus() == ServerResults.DISPUTE_DISABLED) {
+						Window.alert("Disputes are disabled when only two players remain");
+					} else {
+						handleError(request);
+					}
+				} else {
+					handleError(request);
+				}
+			}
+		});
+	}
+
+	/**
+	 * Invoked when the dispute was successfully processed.
+	 * @param gamePage 
+	 * @param game 
+	 * @param dispute either 
+	 */
+	protected void disputeOK(DisputeResult result, Game newGame, MyGame gamePage) {
+		if (result == DisputeResult.SUCCESS) {
+			Window.alert("The dispute was resolved in your favor.");
+		} else {
+			Window.alert("The dispute was resolved against you. You cannot initiate a new dispute against the same person in this game.");
+		}
+		for (int i = 0;i < games.size(); i++) {
+			Game oldGame = games.get(i);
+			if (oldGame.getGameId() == newGame.getGameId()) {
+				// Replace the old game, and update the page
+				games.set(i, newGame);
+				gamePage.updateGame(newGame);
 			}
 		}
-		throw new Exception("Requested a game that does not exist in collection");
 	}
 }

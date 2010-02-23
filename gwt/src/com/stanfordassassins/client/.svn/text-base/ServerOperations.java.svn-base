@@ -31,6 +31,10 @@ public enum ServerOperations {
 	 */
 	reportError
 	,
-	reportLike
+	reportLike,
+	/** 
+	 * To create a dispute on the server. Takes target/victim, description 
+	 */
+	startDispute
 	;
 }

@@ -14,6 +14,10 @@ public enum ServerResults {
 	/**
 	 * Returned when a player issues a like for an assassinationId that he allready likes
 	 */
-	ALREADY_LIKED
+	ALREADY_LIKED,
+	// When the user had already created a dispute against that same target/assassin
+	DISPUTE_EXISTS,
+	// When only two players remain the disputes are disabled
+	DISPUTE_DISABLED
 	;
 }

@@ -37,7 +37,7 @@ END_OF_BODY;
 		return sendHtmlEmail($email, $subject, $body);		
 	}
 
-	function sendGameStarted($email, $gameId, $gameName, $codeword, $targetAlias, $targetName) {
+	function sendGameStarted($email, $gameName, $codeword, $targetAlias, $targetName) {
 		$gameTag = str_replace(' ', '', $gameName);
 		$subject  = "$gameName has started";
 		$body = <<<END_OF_BODY
@@ -53,7 +53,7 @@ END_OF_BODY;
 
 <p>Remember, someone out there is out to get you so trust no one.</p>
 
-<p>Good luck... You’ll need it.</p>
+<p>Good luck... You'll need it.</p>
 END_OF_BODY;
 		return sendHtmlEmail($email, $subject, $body);
 	}

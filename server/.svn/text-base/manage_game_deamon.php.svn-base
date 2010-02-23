@@ -2,12 +2,12 @@
 <?php
 	header('Content-Type: text/plain; charset=utf-8');
 	
+	require_once('common.php');
 	require_once('db_login.php');
-	require_once('emails.php');
 	$debug = isset($_GET['debug']);
 	
-	$date = gmdate("Y-m-d H:i:s");
-	$futureDate = gmdate("Y-m-d H:i:s", time() + 96*60*60);
+	$date = getDate();
+	$futureDate = getDateLimit();
 	trace("Running game manager..."); 
 	
 	// go through each active game + count number of active players
@@ -21,22 +21,17 @@
 		$numPlayers = intval($row['numPlayers']);
 		trace("Managing $gameName...");
 		
-		$playerNameMap = array();
-		$playerEmailMap = array();
-		
 		$timedOutList = array();
 		$assassinationsMap = array();
 		
 		// select all playing players who have timed out
-		$sql  = " SELECT assassinations.gameId, players.playerId, players.name, players.email, assassinations.victimId, assassinations.endDate ";
+		$sql  = " SELECT assassinations.gameId, players.playerId, players.name, assassinations.victimId, assassinations.endDate ";
 		$sql .= " FROM assassinations INNER JOIN players ON players.playerId = assassinations.assassinId "; 
 		$sql .= " WHERE assassinations.state='PENDING' AND assassinations.endDate < '$date';";
 		$result = mysql_query($sql) or sql_error_report($sql);
 		$numTimedOut = mysql_num_rows($result);
 		while($row = mysql_fetch_assoc($result)) {
 			$playerName = $row['name'];
-			$playerNameMap[$row['playerId']] = $playerName; 
-			$playerEmailMap[$row['playerId']] = $row['email']; 
 			trace("Active player $playerName has run out of time to make the kill");
 			
 			array_push($timedOutList, $row['playerId']);
@@ -44,8 +39,10 @@
 		}
 		
 		if($numTimedOut > 0) {
+			require_once('handler.php');
+			
 			foreach ($timedOutList as $timedOutId) {
-				sendTimeOut($playerEmailMap[$timedOutId], $gameName);
+				handleTimeOut($timedOutId);
 			}
 			
 			// eliminate players
@@ -72,19 +69,13 @@
 			// how many players are left in the game?
 			$numPlayersLeft = $numPlayers - $numTimedOut;
 			if($numPlayersLeft == 0) {
-				// If game 0 players, finish it (and send out email to every one)
-				$sql  = " SELECT players.playerId, players.name AS playerName, players.email ";
-				$sql .= " FROM participations INNER JOIN players ON players.playerId = participations.playerId "; 
-				$sql .= " WHERE participations.gameId = '$gameId';"; 
-				$result = mysql_query($sql) or sql_error_report($sql);
-				while($row = mysql_fetch_assoc($result)) {
-					sendGameOver($row['email'], $gameId, $gameName);
-				}
-				
+				// If game 0 players, finish it
 				$sql = "UPDATE games SET state = 'FINISHED', winnerId='0', endDate='$date' WHERE gameId = '$gameId' LIMIT 1;";
 				mysql_query($sql) or sql_error_report($sql);
+				
+				handleGameOver($gameId);
 			} else if($numPlayersLeft == 1) {
-				// If game has 1 player mark game as won with the player who is left + send out game finished email
+				// If game has 1 player mark game as won with the player who is left
 				// find the winner's name and alias
 				$sql  = " SELECT players.playerId, players.name, participations.alias, assassinations.assassinationId, assassinations.victimId ";
 				$sql .= " FROM players INNER JOIN participations ON players.playerId = participations.playerId ";
@@ -104,18 +95,6 @@
 					showError('IMPOSIBLE5');
 				}
 				
-				$sql  = " SELECT players.playerId, players.name AS playerName, players.email ";
-				$sql .= " FROM participations INNER JOIN players ON players.playerId = participations.playerId "; 
-				$sql .= " WHERE participations.gameId = '$gameId';"; 
-				$result = mysql_query($sql) or sql_error_report($sql);
-				while($row = mysql_fetch_assoc($result)) {
-					if($row['playerId'] == $winnerId) {
-						sendGameWon($row['email'], $gameId, $gameName);
-					} else {
-						sendGameOver($row['email'], $gameId, $gameName, $winnerAlias, $winnerName);
-					}
-				}
-				
 				// update the winner
 				$sql = "UPDATE assassinations SET state = 'FAIL' WHERE assassinationId='$winnerAssId' LIMIT 1;";
 				mysql_query($sql) or sql_error_report($sql);
@@ -125,9 +104,11 @@
 				
 				$sql = "UPDATE games SET state = 'FINISHED', winnerId='$winnerId', endDate='$date' WHERE gameId = '$gameId' LIMIT 1;";
 				mysql_query($sql) or sql_error_report($sql);
+				
+				handleGameOver($gameId);
 			} else if($numPlayersLeft == 2) {
-				// If game has 2 people left set people's time to 96 hours and send awesome deathmatch emails
-				$sql  = " SELECT players.playerId, players.name, players.email, participations.alias, assassinations.assassinationId, assassinations.victimId ";
+				// If game has 2 people left set people's time to 96 hours
+				$sql  = " SELECT players.playerId, players.name, participations.alias, assassinations.assassinationId, assassinations.victimId ";
 				$sql .= " FROM players INNER JOIN participations ON players.playerId = participations.playerId ";
 				$sql .= " INNER JOIN assassinations ON players.playerId = assassinations.assassinId ";
 				$sql .= " WHERE participations.state = 'ACTIVE' AND assassinations.state = 'PENDING' AND participations.gameId = '$gameId';";
@@ -139,7 +120,6 @@
 				if($row = mysql_fetch_assoc($result)) {
 					$p1Id = $row['playerId'];
 					$p1Name = $row['name'];
-					$p1Email = $row['email'];
 					$p1Alias = $row['alias'];
 					$p1AssId = $row['assassinationId'];
 					$p1VicId = $row['victimId'];
@@ -150,7 +130,6 @@
 				if($row = mysql_fetch_assoc($result)) {
 					$p2Id = $row['playerId'];
 					$p2Name = $row['name'];
-					$p2Email = $row['email'];
 					$p2Alias = $row['alias'];
 					$p2AssId = $row['assassinationId'];
 					$p2VicId = $row['victimId'];
@@ -181,20 +160,18 @@
 					mysql_query($sql) or sql_error_report($sql);
 				}
 				
-				// send emails
-				sendDeathmatch($p1Email, $gameName, $p2Name);
-				sendDeathmatch($p2Email, $gameName, $p1Name);
+				// handle
+				handleDeathmatch($gameId);
 			} else {
 				// We have more people so do nothing
 				// re arrange the targets
-				$sql  = " SELECT players.playerId, players.name, players.email, participations.alias, assassinations.assassinationId, assassinations.victimId ";
+				$sql  = " SELECT players.playerId, players.name, participations.alias, assassinations.assassinationId, assassinations.victimId ";
 				$sql .= " FROM players INNER JOIN participations ON players.playerId = participations.playerId ";
 				$sql .= " INNER JOIN assassinations ON players.playerId = assassinations.assassinId ";
 				$sql .= " WHERE participations.state = 'ACTIVE' AND assassinations.state = 'PENDING' AND participations.gameId = '$gameId';";
 				$playerResult = mysql_query($sql) or sql_error_report($sql);
 				while($row = mysql_fetch_assoc($playerResult)) {
 					$pId = $row['playerId'];
-					$pEmail = $row['email'];
 					$pAssId = $row['assassinationId'];
 					
 					$numSkiped = 0;
@@ -211,20 +188,27 @@
 						$sql = "INSERT INTO assassinations (gameId, assassinId, victimId, state, startDate, endDate) VALUES ('$gameId', '$pId', '$victimId', 'PENDING', '$date', '$futureDate');";
 						mysql_query($sql) or sql_error_report($sql);
 						
-						$sql  = " SELECT players.name AS newVictimName, participations.alias AS newVictimAlias ";
-						$sql .= " FROM players INNER JOIN participations ON participations.playerId = players.playerId ";
-						$sql .= " WHERE participations.gameId = '$gameId' AND players.playerId = '$victimId' AND participations.state='ACTIVE' LIMIT 1;";
-						$result = mysql_query($sql) or sql_error_report($sql);
-						if($row = mysql_fetch_assoc($result)) {
-							sendTargetChanged($pEmail, $gameName, $row['newVictimAlias'], $row['newVictimName']);
-						}
+						handleTargetChanged($pId, $gameId);
 					}
 				}
 			}
 		}
 	}
 	
-
+	trace("Details timeout manager...");
+	$sql = "SELECT assassinationId FROM assassinations WHERE state = 'SUCCESS' AND detailsState='NONE' AND endDate < DATE_SUB('$date', INTERVAL 2 MINUTE);";
+	$result = mysql_query($sql) or sql_error_report($sql);
+	while($row = mysql_fetch_assoc($result)) {
+		require_once('handler.php');
+		
+		$assassinationId = $row['assassinationId'];
+		$sql = "UPDATE assassinations SET detailsState='TIMEOUT' WHERE assassinationId='$assassinationId' LIMIT 1;";
+		mysql_query($sql) or sql_error_report($sql);
+		
+		handleDetailsTimeout($assassinationId);
+	}
+	
+	/////////////////////////////////////////////////////////////////
 	
 	function trace($str) {
 		global $debug;
@@ -245,33 +229,9 @@
 	function sql_error_report($sql) {
 		require_once('db_login.php');
 		
-		$date = gmdate("Y-m-d H:i:s");
+		$date = getDate();
 		$sqlError = mysql_error();
 		mysql_query(sprintf("INSERT INTO errors (type, error, extra, date) VALUES ('SQL', '%s', 'make_game_deamon:%s', '%s');", addslashes($sqlError), addslashes($sql), $date));
 		die($sqlError . "\n" . $sql);
 	}
-	
-	/*
-	 * go through all the active games (have number of currently active players)
-  count number of timed out players
-    (know how many will be left)
-    elimnate all the timed out players (update players, participations and fail assassinations, keep assassinations as a map)
-    
-    
-    
-    
-    eliominate them and send email + record games where palyer timed out
-   
-go through all the active games where a player has timed out
-  if game 0 palyers 
-    finish it (and send out email to every one
-  
-  if game has 1 palyer
-    mark game as won with the palyer who is left + send ot game finished email
-    
-  if game has 2 people left
-    set people's time to 96 hours and send awesome deathmatch emails
-    
-  if game has 3 players left then do nothing 
-	*/
 ?>

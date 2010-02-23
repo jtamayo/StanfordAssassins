@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 59
-/svn/!svn/ver/69/trunk/gwt/src/com/stanfordassassins/client
+/svn/!svn/ver/78/trunk/gwt/src/com/stanfordassassins/client
 END
 Join.java
 K 25
@@ -25,13 +25,25 @@ Game.java
 K 25
 svn:wc:ra_dav:version-url
 V 69
-/svn/!svn/ver/37/trunk/gwt/src/com/stanfordassassins/client/Game.java
+/svn/!svn/ver/78/trunk/gwt/src/com/stanfordassassins/client/Game.java
 END
 ServerOperations.java
 K 25
 svn:wc:ra_dav:version-url
 V 81
-/svn/!svn/ver/55/trunk/gwt/src/com/stanfordassassins/client/ServerOperations.java
+/svn/!svn/ver/74/trunk/gwt/src/com/stanfordassassins/client/ServerOperations.java
+END
+DisputeResult.java
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/!svn/ver/74/trunk/gwt/src/com/stanfordassassins/client/DisputeResult.java
+END
+DisputeAgainst.java
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/!svn/ver/74/trunk/gwt/src/com/stanfordassassins/client/DisputeAgainst.java
 END
 GameHistory.ui.xml
 K 25
@@ -44,6 +56,12 @@ K 25
 svn:wc:ra_dav:version-url
 V 75
 /svn/!svn/ver/37/trunk/gwt/src/com/stanfordassassins/client/FormatUtil.java
+END
+DisputeDialog.ui.xml
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/!svn/ver/74/trunk/gwt/src/com/stanfordassassins/client/DisputeDialog.ui.xml
 END
 GameHistory.java
 K 25
@@ -75,6 +93,12 @@ svn:wc:ra_dav:version-url
 V 76
 /svn/!svn/ver/34/trunk/gwt/src/com/stanfordassassins/client/PlayerState.java
 END
+DisputeDialog.java
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/!svn/ver/77/trunk/gwt/src/com/stanfordassassins/client/DisputeDialog.java
+END
 LeaderBoard.ui.xml
 K 25
 svn:wc:ra_dav:version-url
@@ -93,17 +117,17 @@ svn:wc:ra_dav:version-url
 V 74
 /svn/!svn/ver/39/trunk/gwt/src/com/stanfordassassins/client/Composite.java
 END
-LeaderBoard.java
-K 25
-svn:wc:ra_dav:version-url
-V 76
-/svn/!svn/ver/67/trunk/gwt/src/com/stanfordassassins/client/LeaderBoard.java
-END
 MyStats.java
 K 25
 svn:wc:ra_dav:version-url
 V 72
 /svn/!svn/ver/60/trunk/gwt/src/com/stanfordassassins/client/MyStats.java
+END
+LeaderBoard.java
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/67/trunk/gwt/src/com/stanfordassassins/client/LeaderBoard.java
 END
 ParticipationState.java
 K 25
@@ -115,19 +139,19 @@ StanfordAssassins.java
 K 25
 svn:wc:ra_dav:version-url
 V 82
-/svn/!svn/ver/69/trunk/gwt/src/com/stanfordassassins/client/StanfordAssassins.java
+/svn/!svn/ver/74/trunk/gwt/src/com/stanfordassassins/client/StanfordAssassins.java
+END
+MyGame.ui.xml
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/78/trunk/gwt/src/com/stanfordassassins/client/MyGame.ui.xml
 END
 GameState.java
 K 25
 svn:wc:ra_dav:version-url
 V 74
 /svn/!svn/ver/37/trunk/gwt/src/com/stanfordassassins/client/GameState.java
-END
-MyGame.ui.xml
-K 25
-svn:wc:ra_dav:version-url
-V 73
-/svn/!svn/ver/64/trunk/gwt/src/com/stanfordassassins/client/MyGame.ui.xml
 END
 PlayerStats.java
 K 25
@@ -145,25 +169,25 @@ MyGame.java
 K 25
 svn:wc:ra_dav:version-url
 V 71
-/svn/!svn/ver/69/trunk/gwt/src/com/stanfordassassins/client/MyGame.java
+/svn/!svn/ver/78/trunk/gwt/src/com/stanfordassassins/client/MyGame.java
 END
 Header.ui.xml
 K 25
 svn:wc:ra_dav:version-url
 V 73
-/svn/!svn/ver/61/trunk/gwt/src/com/stanfordassassins/client/Header.ui.xml
-END
-ServerResults.java
-K 25
-svn:wc:ra_dav:version-url
-V 78
-/svn/!svn/ver/55/trunk/gwt/src/com/stanfordassassins/client/ServerResults.java
+/svn/!svn/ver/71/trunk/gwt/src/com/stanfordassassins/client/Header.ui.xml
 END
 Header.java
 K 25
 svn:wc:ra_dav:version-url
 V 71
-/svn/!svn/ver/24/trunk/gwt/src/com/stanfordassassins/client/Header.java
+/svn/!svn/ver/71/trunk/gwt/src/com/stanfordassassins/client/Header.java
+END
+ServerResults.java
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/!svn/ver/74/trunk/gwt/src/com/stanfordassassins/client/ServerResults.java
 END
 Join.ui.xml
 K 25
@@ -171,17 +195,17 @@ svn:wc:ra_dav:version-url
 V 71
 /svn/!svn/ver/64/trunk/gwt/src/com/stanfordassassins/client/Join.ui.xml
 END
-Reply.java
-K 25
-svn:wc:ra_dav:version-url
-V 70
-/svn/!svn/ver/46/trunk/gwt/src/com/stanfordassassins/client/Reply.java
-END
 NewsFeed.ui.xml
 K 25
 svn:wc:ra_dav:version-url
 V 75
 /svn/!svn/ver/17/trunk/gwt/src/com/stanfordassassins/client/NewsFeed.ui.xml
+END
+Reply.java
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/74/trunk/gwt/src/com/stanfordassassins/client/Reply.java
 END
 ExceptionHandler.java
 K 25

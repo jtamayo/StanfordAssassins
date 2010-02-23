@@ -37,7 +37,7 @@ public class Header extends Composite {
 
 	@UiHandler("logOutAnchor")
 	void onClick(ClickEvent e) {
-		//
+		StanfordAssassins.redirect("http://stanfordassassins.com/logout.php");
 	}
 
 }

@@ -16,12 +16,15 @@
 			font-size: small;
 			float: right;
 		}
+		.logout {
+			cursor: inherit;
+		}
 	</ui:style>
 	
 	<g:HTMLPanel styleName="headerCont">
 		<div class="{style.right}">
 			<g:InlineLabel ui:field="nameLabel"/> | 
-			<g:Anchor ui:field="logOutAnchor" href="#" text="Log out"/>
+			<g:Anchor ui:field="logOutAnchor" addStyleNames="{style.logout}" href="#" text="Log out"/>
 		</div>
 		<div class="{style.main}">
 			<g:Image url="images/logo1.png"></g:Image>

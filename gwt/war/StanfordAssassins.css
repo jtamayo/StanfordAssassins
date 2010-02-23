@@ -50,9 +50,6 @@ h2 {
 }
 
 /** Most GWT widgets already have a style name defined */
-.gwt-DialogBox {
-  width: 400px;
-}
 
 .gwt-TabBar .gwt-TabBarItem {
   background-color: #D9C892;
@@ -126,6 +123,18 @@ h2 {
 	font-style: italic;
 	color: DarkGray;
 }
+
+.disputeAnchor {
+	font-size:	x-small;
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+.disputeAnchor-disabled {
+	color: #333;
+	text-decoration: none;
+}
+		
 /* DEBUG */
 
 #waitingList {

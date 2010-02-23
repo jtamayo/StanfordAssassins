@@ -25,6 +25,10 @@ public class Game extends JavaScriptObject {
 	public native final String getTargetAlias() /*-{
 		return this.targetAlias;
 	}-*/;
+	
+	public native final String getTargetEmail() /*-{
+		return this.targetEmail;
+	}-*/;
 
 	private native final String getKillDeadlineString() /*-{
 		return this.killDeadline;
@@ -54,6 +58,16 @@ public class Game extends JavaScriptObject {
 	private native final String getGameStateString() /*-{
 		return this.gameState;
 	}-*/;
+
+	public final boolean isDeathmatch() {
+//		return Boolean.parseBoolean(getDeatmatchString());
+		return true;
+	}
+	
+	private native final String getDeatmatchString() /*-{
+		return this.deatmatch;
+	}-*/;
+
  
 
 	/**

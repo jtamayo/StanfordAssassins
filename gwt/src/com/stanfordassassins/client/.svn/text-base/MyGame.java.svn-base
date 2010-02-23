@@ -18,26 +18,23 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.HTMLTable;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.HTMLTable;
-import com.google.gwt.user.client.ui.Grid;
 
 /**
  * @author juanmtamayo
@@ -54,7 +51,7 @@ public class MyGame extends Composite {
 	}
 	 
 	@UiField
-	Label targetLabel;
+	Anchor targetLabel;
 	@UiField
 	Label timeRemainingLabel;
 	@UiField
@@ -75,8 +72,13 @@ public class MyGame extends Composite {
 	Label aliasLabel;
 	@UiField
 	VerticalPanel gameInfoPanel;
+	@UiField
+	Label disputeWithTargetAnchor;
+	@UiField
+	Label disputeWithAssassinAnchor;
 
 	public MyGame(Game game, StanfordAssassins controller) {
+		
 		initWidget(uiBinder.createAndBindUi(this));
 		
 		this.controller = controller;
@@ -109,12 +111,27 @@ public class MyGame extends Composite {
 		aliasLabel.setText(game.getAlias());
 		codewordLabel.setText(game.getCodeword());// Always set the codeword, because it's next to the alias
 		
+		if (game.isDeathmatch()) {
+			disputeWithTargetAnchor.addStyleDependentName("disabled");
+			disputeWithAssassinAnchor.addStyleDependentName("disabled");
+			
+			disputeWithTargetAnchor.setTitle("Disputes are disabled when only two players remain");
+			disputeWithAssassinAnchor.setTitle("Disputes are disabled when only two players remain");
+		} else {
+			disputeWithTargetAnchor.removeStyleDependentName("disabled");
+			disputeWithAssassinAnchor.removeStyleDependentName("disabled");
+			
+			disputeWithTargetAnchor.setTitle("");
+			disputeWithAssassinAnchor.setTitle("");
+			
+		}
+		
 		switch (game.getGameState()) {
 		case ACTIVE:
 			if (game.getParticipationState() == ParticipationState.ACTIVE) {
 				// Show all the target time and stuff
 				targetLabel.setText(game.getTargetName() + " (" + game.getTargetAlias() + ")");
-				
+				targetLabel.setHref("https://stanfordwho.stanford.edu/SWApp/Search.do?search=" + game.getTargetEmail());
 				timeRemainingLabel.setText(getTimeRemaining(game));
 				reportPanel.setVisible(true);
 				gameInfoPanel.setVisible(true);
@@ -257,37 +274,27 @@ public class MyGame extends Composite {
 	}
 	
 	
-	private void showDisputeMessage() {
+	private void showDisputeMessage(final DisputeAgainst against) {
 		// Create the popup dialog box
 		final DialogBox dialogBox = new DialogBox();
-		dialogBox.setText("Dispute");
-		final Button okButton = new Button("OK");
-		// We can set the id of a widget by accessing its Element
-		okButton.getElement().setId("okButton");
-		final Button cancelButton = new Button("Cancel");
-		cancelButton.getElement().setId("cancelButton");
-		
-		final TextArea detailsArea = new TextArea();
-		VerticalPanel dialogVPanel = new VerticalPanel();
-		dialogVPanel.addStyleName("dialogVPanel");
-		dialogVPanel.add(new HTML("Please enter your side of the story:"));
-		dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
-		dialogVPanel.add(detailsArea);
-		
-		HorizontalPanel buttonsPanel = new HorizontalPanel();
-		buttonsPanel.add(okButton);
-		buttonsPanel.add(cancelButton);
-		
-		dialogVPanel.add(buttonsPanel);
-		dialogBox.setWidget(dialogVPanel);
+		final String againstStr = against == DisputeAgainst.TARGET ? "target" : "assassin";
+		dialogBox.setText("Dispute with your " + againstStr);
+
+		final DisputeDialog content = new DisputeDialog(against);
+		dialogBox.setWidget(content);
+		dialogBox.setWidth("600px");
 		
 		// Add a handler to close the DialogBox
-		okButton.addClickHandler(new ClickHandler() {
+		content.submitButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				dialogBox.hide();
+				if (content.isAcknowledgeFilled()) {
+					controller.submitDispute(content.getReason(), against, MyGame.this, dialogBox);
+				} else {
+					Window.alert("You must acknowledge that you spoke with your " + againstStr + ".");
+				}
 			}
 		});		
-		cancelButton.addClickHandler(new ClickHandler() {
+		content.cancelButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				dialogBox.hide();
 			}
@@ -297,16 +304,21 @@ public class MyGame extends Composite {
 	}
 	@UiHandler(value="disputeWithAssassinAnchor")
 	void onDisputeWithAssassinClick(ClickEvent e) {
-		showDisputeMessage();
+		if (game.isDeathmatch()) {
+			return; // No disputes are allowed on deatmatch mode
+		}
+		showDisputeMessage(DisputeAgainst.ASSASSIN);
 	}
 	
 	@UiHandler(value="disputeWithTargetAnchor")
 	void onDisputeWithTargetClick(ClickEvent e) {
-		showDisputeMessage();
+		if (game.isDeathmatch()) {
+			return; // No disputes are allowed on deathmatch mode
+		}
+		showDisputeMessage(DisputeAgainst.TARGET);
 	}
 
 	public void showAssassinatedDialog(Game oldGame, Game newGame, final String assassinationId) {
-		// TODO: Update the character count
 		HTMLPanel remainingCharsPanel = new HTMLPanel("Remaining characters: <span id='remainingCharsLabel' >");
 		final InlineLabel remainingCharsLabel = new InlineLabel("200");
 		remainingCharsPanel.addAndReplaceElement(remainingCharsLabel, "remainingCharsLabel");
@@ -315,12 +327,11 @@ public class MyGame extends Composite {
 		final DialogBox dialogBox = new DialogBox();
 		
 		dialogBox.setText("Tell us the details");
+
 		final Button okButton = new Button("OK");
 		final TextArea detailsArea = new TextArea();
 		detailsArea.setWidth("100%");
 		detailsArea.setVisibleLines(3);
-		
-		// TODO: The management of maximum lenght SUCKS, and needs to be fixed
 		
 		detailsArea.addKeyUpHandler(new KeyUpHandler() {
 			
@@ -347,6 +358,7 @@ public class MyGame extends Composite {
 		dialogVPanel.add(detailsArea);
 		dialogVPanel.add(remainingCharsPanel);
 		dialogVPanel.add(okButton);
+		dialogBox.setWidth("400px");
 		dialogBox.setWidget(dialogVPanel);
 
 		// Add a handler to close the DialogBox
@@ -358,6 +370,7 @@ public class MyGame extends Composite {
 			}
 		});
 
+		detailsArea.setFocus(true);
 		dialogBox.center();
 	}
 

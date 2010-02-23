@@ -52,10 +52,6 @@
 			font-size:	medium;
 		}
 		
-		.disputeAnchor {
-			font-size:	x-small;
-		}
-		
 		.subheader {
 			margin-top:	0px;
 			margin-bottom:	8px;
@@ -87,6 +83,11 @@
 			margin-top: 5px;
 		}
 		
+		.target, .target:visited {
+			color: inherit;
+			text-decoration: none;
+		}
+		
 	</ui:style>
 	
 	<g:HTMLPanel>
@@ -100,7 +101,7 @@
 				</g:HTMLPanel>
 				<g:VerticalPanel ui:field="gameInfoPanel" addStyleNames="{style.gameInfoPanel}" width="100%">
 					<g:Label addStyleNames="{style.gameInfoLabel}">Target</g:Label>
-					<g:Label addStyleNames="{style.gameInfo}" ui:field="targetLabel" />
+					<g:Anchor stylePrimaryName="{style.target}" addStyleNames="{style.gameInfo}" ui:field="targetLabel" title="Look up your target on Stanford Who"/>
 					<g:Label addStyleNames="{style.gameInfo}, {style.timer}" ui:field="timeRemainingLabel" />
 					<g:HTMLPanel visible="false">
 						<div class="{style.gameInfoLabel}">Victims so far</div>
@@ -120,8 +121,8 @@
 					<g:TextBox ui:field="victimBox" addStyleNames="{style.reportBox}"/> 
 					<g:Button ui:field="reportKillButton" addStyleNames="{style.reportButton}">Report</g:Button>
 					<g:VerticalPanel>
-						<g:Anchor ui:field="disputeWithTargetAnchor" addStyleNames="{style.disputeAnchor}" text="Dispute with target" href="#"/> <!-- TODO: Fix the href so the link looks nice, but doesn't point to a random place in the page -->
-						<g:Anchor ui:field="disputeWithAssassinAnchor" addStyleNames="{style.disputeAnchor}" text="Dispute with assassin" href="#"/>
+						<g:Label ui:field="disputeWithTargetAnchor" stylePrimaryName="disputeAnchor" text="Dispute with target"/> 
+						<g:Label ui:field="disputeWithAssassinAnchor" stylePrimaryName="disputeAnchor" text="Dispute with assassin"/>
 					</g:VerticalPanel> 
 					</g:HorizontalPanel>
 				</g:HTMLPanel>

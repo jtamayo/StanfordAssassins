@@ -64,4 +64,13 @@ Leadearboard entry:
     gamesWon: "3"
 }
 
+// cmd=startDispute against=[TAR|ASS] description=<desc>
+{
+	status: "OK",
+	dispute: "SUCCESS"
+}
+
+
+
+
 
