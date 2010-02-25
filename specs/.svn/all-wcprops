@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 28
-/svn/!svn/ver/75/trunk/specs
+/svn/!svn/ver/89/trunk/specs
 END
 protocol.txt
 K 25
@@ -19,5 +19,5 @@ DB Update.txt
 K 25
 svn:wc:ra_dav:version-url
 V 44
-/svn/!svn/ver/75/trunk/specs/DB%20Update.txt
+/svn/!svn/ver/89/trunk/specs/DB%20Update.txt
 END

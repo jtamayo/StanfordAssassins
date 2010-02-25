@@ -26,8 +26,15 @@ ALTER TABLE  `disputes` ADD  `won` ENUM(  'ACC',  'DEF' ) NOT NULL DEFAULT  'DEF
 ALTER TABLE  `disputes` CHANGE  `status`  `status` ENUM(  'CREATED',  'REBUTED',  'RESOLVED_ACC',  'RESOLVED_DEF' ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT  'CREATED';
 
 
+
 ALTER TABLE  `assassinations` ADD  `detailsState` ENUM(  'NONE',  'ADDED',  'TIMEOUT' ) NOT NULL DEFAULT  'NONE' ;
 
 UPDATE `assassinations` SET details='', detailsState='TIMEOUT' WHERE details='#' AND detailsState='NONE' ;
 UPDATE `assassinations` SET detailsState='ADDED' WHERE detailsState='NONE' ;
 UPDATE `assassinations` SET detailsState='NONE' WHERE state != 'SUCCESS' ;
+ALTER TABLE  `assassinations` CHANGE  `details`  `details` VARCHAR( 2000 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT  '' ;
+
+
+
+ALTER TABLE  `assassinations` CHANGE  `state`  `state` ENUM(  'PENDING',  'SUCCESS',  'SELF_DEFENSE',  'FAIL',  'KICKED',  'WANTED' ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT  'PENDING' ;
+ALTER TABLE  `games` ADD  `timeoutHours` INT NOT NULL DEFAULT  '144', ADD  `wantedHours` INT NOT NULL DEFAULT  '72' ;

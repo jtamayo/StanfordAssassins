@@ -33,8 +33,9 @@
 		</div>
 		<h4>The World of Assassins</h4>
 		<div>
-			It is a dubious world out there. Everybody is out there to get you. Trust no one but yourself since everybody is a possible assassin.
-			At the all times during the game each player is assigned a target and has a specific time window to find and assassinate the target. 
+			It is a paranoid world out there. Everybody is out there to get you. Trust no one but yourself since everybody is a possible assassin.<br/>
+			At the all times during the game, each player is assigned a target and has a specific time window to find and assassinate the target.<br/>
+			If you take to long to find your target and complete the assassination you will be placed on the free-for-all wanted list; in which case you are pretty much dead.
 		</div>
         <h4>Codewords</h4>
 		<div>
@@ -44,7 +45,7 @@
 		<h4>Assassinating</h4>
 		<div>
 			Track down your target and when the right time comes...
-			You can assasasinate your target by using a melee or ranged weapon.
+			You can assassinate your target by using a melee or ranged weapon.
 		</div>
 		<h4>Weapons</h4>
 		<div>
@@ -54,13 +55,11 @@
             	<li>A sock – throw a <em>clean</em> rolled up sock at your target</li>
             </ul>
 		</div>
-        <!--
-		<h4>Self-Protection</h4>
+		<h4>Self-Defense</h4>
 		<div>
-			Watch your back...
-			Your are allowed to use a designated weapon to perfom a self-defense kill if you notice sometone approaching for a kill.
+			Your are allowed to use a legal weapon defend yourself from your assassin if you catch them attempting to assassinate you.<br/>
+			Make sure to get their codeword and then submit it as usual.
 		</div>
-        -->
 		<h4>Safe Zones</h4>
 		<div>
 			<ul>
@@ -74,6 +73,11 @@
 		<h4>Assassination report</h4>
 		<div>
 			Report an assassination on the website by typing in your target's codeword. Your new target will be assigned to you immediately (or you will be declared the winner).
+		</div>
+		<h4>Wanted List</h4>
+		<div>
+			When assassins take to long to complete an assassination they will be placed on the Wanted List.<br/>
+			If you see someone on the Wanted List you are allowed to assassinate them extending you own time limit. 
 		</div>
 	</body>
 </html>

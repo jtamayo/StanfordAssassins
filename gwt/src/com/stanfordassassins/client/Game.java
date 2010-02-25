@@ -3,6 +3,7 @@ package com.stanfordassassins.client;
 import java.util.Date;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 
 /**
  * Represents both a game and the participation of a player in the game.
@@ -13,21 +14,17 @@ public class Game extends JavaScriptObject {
 
 	protected Game() {
 	}
+	
+	public native final Target getTarget() /*-{
+		return this.target;
+	}-*/;
+	
+	public native final JsArray<Target> getWantedList() /*-{
+		return this.wantedList;
+	}-*/;
 
 	public native final int getGameId() /*-{
 		return parseInt(this.gameId, 10);
-	}-*/;
-
-	public native final String getTargetName() /*-{
-		return this.targetName;
-	}-*/;
-
-	public native final String getTargetAlias() /*-{
-		return this.targetAlias;
-	}-*/;
-	
-	public native final String getTargetEmail() /*-{
-		return this.targetEmail;
 	}-*/;
 
 	private native final String getKillDeadlineString() /*-{
@@ -36,6 +33,14 @@ public class Game extends JavaScriptObject {
 
 	public final Date getKillDeadline() {
 		return FormatUtil.parseDate(getKillDeadlineString());
+	}
+	
+	private native final String getWantedDeadlineString() /*-{
+		return this.wantedDeadline;// XXX Debug, return to wanted deadline
+	}-*/;
+	
+	public final Date getWantedDeadline() {
+		return FormatUtil.parseDate(getWantedDeadlineString());
 	}
 
 	public native final String getCodeword() /*-{
@@ -60,12 +65,12 @@ public class Game extends JavaScriptObject {
 	}-*/;
 
 	public final boolean isDeathmatch() {
-//		return Boolean.parseBoolean(getDeatmatchString());
-		return true;
+		String deathmatchString = getDeathmatchString();
+		return Boolean.parseBoolean(deathmatchString);
 	}
 	
-	private native final String getDeatmatchString() /*-{
-		return this.deatmatch;
+	private native final String getDeathmatchString() /*-{
+		return this.deathmatch;
 	}-*/;
 
  

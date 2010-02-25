@@ -69,7 +69,7 @@ if($fail === false) {
 if($fail === false) {
 	require_once('common.php');
 	require_once('db_login.php');
-	$date = getDate();
+	$date = getDateNow();
 	
 	$sql = "SELECT playerId FROM players WHERE email='$email' LIMIT 1;";
 	$result = mysql_query($sql) or ($fail = mysql_error());

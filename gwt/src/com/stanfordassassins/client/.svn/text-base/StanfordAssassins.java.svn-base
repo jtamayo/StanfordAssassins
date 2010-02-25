@@ -1,7 +1,10 @@
 package com.stanfordassassins.client;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -91,7 +94,10 @@ public class StanfordAssassins implements EntryPoint {
 			}
 		});
 		
-		request("cmd=" + ServerOperations.allData, new MyCallback() {
+		RequestParameters p = new RequestParameters();
+		p.put("cmd", ServerOperations.allData);
+		// "cmd=" + ServerOperations.allData
+		request(p, new MyCallback() {
 			
 			public void onResponseReceived(Request request, Response response) {
 				if (200 == response.getStatusCode()) {
@@ -247,8 +253,12 @@ public class StanfordAssassins implements EntryPoint {
 	
 	public void onJoin(final String alias) {
 		// TODO: Check for SQL injection on alias
+		RequestParameters p = new RequestParameters();
+		p.put("cmd", ServerOperations.joinGame);
+		p.put("alias", alias);
+		//"cmd=" + ServerOperations.joinGame + "&alias=" + alias
 		
-		request("cmd=" + ServerOperations.joinGame + "&alias=" + alias, new MyCallback() {
+		request(p, new MyCallback() {
 			
 			public void onResponseReceived(Request request, Response response) {
 				if (200 == response.getStatusCode()) {
@@ -326,13 +336,18 @@ public class StanfordAssassins implements EntryPoint {
 
 	public void assassinate(String codeword, final MyGame myGame, int gameId) {
 		// TODO: Check for SQL injection on alias
-		request("cmd=" + ServerOperations.reportAssassination + "&codeword=" + codeword + "&gameId=" + gameId, new MyCallback() {
+		RequestParameters p = new RequestParameters();
+		p.put("cmd", ServerOperations.reportAssassination);
+		p.put("codeword", codeword);
+		p.put("gameId", gameId);
+		//"cmd=" + ServerOperations.reportAssassination + "&codeword=" + codeword + "&gameId=" + gameId
+		request(p, new MyCallback() {
 			
 			public void onResponseReceived(Request request, Response response) {
 				if (200 == response.getStatusCode()) {
 					Reply reply = Reply.asReply(response.getText());
 					if (reply.getStatus() == ServerResults.OK) {
-						assassinateOK(reply.getGame(), myGame, reply.getAssassinationId());
+						onAssassinateOK(reply.getGame(), myGame, reply.getAssassinationId(), reply.getVictim(), reply.getAssassinationType());
 					} else if (reply.getStatus() == ServerResults.BAD_CODEWORD) {
 						assassinateBadCodeword();
 					}
@@ -347,7 +362,7 @@ public class StanfordAssassins implements EntryPoint {
 		alertMessage("That codeword does not correspond to any player.");
 	}
 
-	private void assassinateOK(Game newGame, MyGame gamePage, String assassinationId) {
+	private void onAssassinateOK(Game newGame, MyGame gamePage, String assassinationId, Target target, NewsType newsType) {
 		gamePage.victimBox.setText("");
 
 		for (int i = 0;i < games.size(); i++) {
@@ -357,7 +372,7 @@ public class StanfordAssassins implements EntryPoint {
 				games.set(i, newGame);
 				gamePage.updateGame(newGame);
 				// Now show the assassinated dialog, and everything else
-				gamePage.showAssassinatedDialog(oldGame, newGame, assassinationId);
+				gamePage.showAssassinatedDialog(oldGame, newGame, assassinationId, target, newsType);
 			}
 		}
 		
@@ -366,7 +381,12 @@ public class StanfordAssassins implements EntryPoint {
 	public void addAssassinationDetails(final MyGame game, String details, String assassinationId) {
 		// TODO: Check for SQL injection on alias
 		// TODO: Convert this to a POST request
-		request("cmd=" + ServerOperations.addDetails + "&assassinationId=" + assassinationId + "&details=" + details, new MyCallback() {
+		RequestParameters p = new RequestParameters();
+		p.put("cmd", ServerOperations.addDetails);
+		p.put("assassinationId", assassinationId);
+		p.put("details", details);
+		//"cmd=" + ServerOperations.addDetails + "&assassinationId=" + assassinationId + "&details=" + details
+		request(p, new MyCallback() {
 			public void onResponseReceived(Request request, Response response) {
 				if (200 == response.getStatusCode()) {
 					Reply reply = Reply.asReply(response.getText());
@@ -384,7 +404,10 @@ public class StanfordAssassins implements EntryPoint {
 
 	// TODO: Check for SQL injection on alias
 	public void loadLeaderboard(){
-		request("cmd=" + ServerOperations.getLeaderboard, new MyCallback() {
+		RequestParameters p = new RequestParameters();
+		p.put("cmd", ServerOperations.getLeaderboard);
+		//"cmd=" + ServerOperations.getLeaderboard
+		request(p, new MyCallback() {
 			public void onResponseReceived(Request request, Response response) {
 				if (200 == response.getStatusCode()) {
 					// Do login, save the data
@@ -400,10 +423,10 @@ public class StanfordAssassins implements EntryPoint {
 		});
 	}
 	
-	private void request(String data, final MyCallback callback) {
+	private void request(RequestParameters params, final MyCallback callback) {
 		String url = StanfordAssassins.SERVER_URL;
 		RequestBuilder builder = new RequestBuilder(METHOD, url);
-		data = URL.encode(data);
+		String data = params.encode();
 		builder.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
 		try {
@@ -423,7 +446,10 @@ public class StanfordAssassins implements EntryPoint {
 	}
 	
 	public void loadPlayerStats(){
-		request("cmd=" + ServerOperations.getPlayerStats, new MyCallback() {
+		RequestParameters p = new RequestParameters();
+		p.put("cmd", ServerOperations.getPlayerStats);
+		// "cmd=" + ServerOperations.getPlayerStats
+		request(p, new MyCallback() {
 			public void onResponseReceived(Request request, Response response) {
 				if (200 == response.getStatusCode()) {
 					// Do login, save the data
@@ -440,7 +466,11 @@ public class StanfordAssassins implements EntryPoint {
 	}
 	
 	public void like(final MyGame myGame, int assassinationId) {
-		request("cmd=" + ServerOperations.reportLike + "&assassinationId=" + assassinationId, new MyCallback() {
+		RequestParameters p = new RequestParameters();
+		p.put("cmd", ServerOperations.reportLike);
+		p.put("assassinationId", assassinationId);
+		// "cmd=" + ServerOperations.reportLike + "&assassinationId=" + assassinationId
+		request(p, new MyCallback() {
 			
 			public void onResponseReceived(Request request, Response response) {
 				if (200 == response.getStatusCode()) {
@@ -491,11 +521,16 @@ public class StanfordAssassins implements EntryPoint {
 	}
 
 	public void submitDispute(String reason, final DisputeAgainst against, final MyGame gamePage, final DialogBox dialogBox) {
-		String data = "cmd=" + ServerOperations.startDispute;
-		data += "&against="  + (against == DisputeAgainst.TARGET ? "TAR" : "ASS");
-		data += "&description=" + reason;
-		data += "&gameId=" + gamePage.game.getGameId();
-		request(data , new MyCallback() {
+//		String data = "cmd=" + ServerOperations.startDispute;
+//		data += "&against="  + (against == DisputeAgainst.TARGET ? "TAR" : "ASS");
+//		data += "&description=" + reason;
+//		data += "&gameId=" + gamePage.game.getGameId();
+		RequestParameters p = new RequestParameters();
+		p.put("cmd", ServerOperations.startDispute);
+		p.put("against", (against == DisputeAgainst.TARGET ? "TAR" : "ASS"));
+		p.put("description", reason);
+		p.put("gameId", gamePage.game.getGameId());
+		request(p , new MyCallback() {
 			
 			public void onResponseReceived(Request request, Response response) {
 				dialogBox.hide();
@@ -538,5 +573,25 @@ public class StanfordAssassins implements EntryPoint {
 				gamePage.updateGame(newGame);
 			}
 		}
+	}
+}
+
+class RequestParameters {
+	Map<String, String> parameters = new HashMap<String, String>();
+	
+	public void put(String name, String parameter) {
+		parameters.put(name, parameter);
+	}
+	
+	public void put(String name, Object parameter) {
+		parameters.put(name, parameter.toString());
+	}
+	
+	public String encode() {
+		StringBuilder b = new StringBuilder();
+		for (Entry<String, String> e : parameters.entrySet()) {
+			b.append(e.getKey() + "=" + URL.encodeComponent(e.getValue()) + "&");
+		}
+		return b.toString();
 	}
 }

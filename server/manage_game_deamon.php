@@ -6,7 +6,7 @@
 	require_once('db_login.php');
 	$debug = isset($_GET['debug']);
 	
-	$date = getDate();
+	$date = getDateNow();
 	$futureDate = getDateLimit();
 	trace("Running game manager..."); 
 	
@@ -38,7 +38,7 @@
 			$assassinationsMap[$row['playerId']] = $row['victimId'];		
 		}
 		
-		if($numTimedOut > 0) {
+		if(0 < $numTimedOut) {
 			require_once('handler.php');
 			
 			foreach ($timedOutList as $timedOutId) {
@@ -107,7 +107,7 @@
 				
 				handleGameOver($gameId);
 			} else if($numPlayersLeft == 2) {
-				// If game has 2 people left set people's time to 96 hours
+				// If game has 2 people left set people's time to X hours
 				$sql  = " SELECT players.playerId, players.name, participations.alias, assassinations.assassinationId, assassinations.victimId ";
 				$sql .= " FROM players INNER JOIN participations ON players.playerId = participations.playerId ";
 				$sql .= " INNER JOIN assassinations ON players.playerId = assassinations.assassinId ";
@@ -229,7 +229,7 @@
 	function sql_error_report($sql) {
 		require_once('db_login.php');
 		
-		$date = getDate();
+		$date = getDateNow();
 		$sqlError = mysql_error();
 		mysql_query(sprintf("INSERT INTO errors (type, error, extra, date) VALUES ('SQL', '%s', 'make_game_deamon:%s', '%s');", addslashes($sqlError), addslashes($sql), $date));
 		die($sqlError . "\n" . $sql);

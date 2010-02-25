@@ -17,12 +17,15 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -35,6 +38,7 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.stanfordassassins.client.resources.IconBundle;
 
 /**
  * @author juanmtamayo
@@ -54,6 +58,8 @@ public class MyGame extends Composite {
 	Anchor targetLabel;
 	@UiField
 	Label timeRemainingLabel;
+	@UiField
+	Label timeBeforeWaitListLabel;
 	@UiField
 	Label codewordLabel;
 	@UiField
@@ -76,6 +82,8 @@ public class MyGame extends Composite {
 	Label disputeWithTargetAnchor;
 	@UiField
 	Label disputeWithAssassinAnchor;
+	@UiField
+	FlexTable wantedListTable;
 
 	public MyGame(Game game, StanfordAssassins controller) {
 		
@@ -99,9 +107,8 @@ public class MyGame extends Composite {
 
 	protected void updateTimerLabel() {
 		if (game.getGameState() == GameState.ACTIVE && game.getParticipationState() == ParticipationState.ACTIVE) {
-			// TODO: Display the appropriate message when the time reaches zero
-			String timeRemainingString = getTimeRemaining(game);
-			timeRemainingLabel.setText(timeRemainingString);
+			timeRemainingLabel.setText(getTimeRemaining(game));
+			timeBeforeWaitListLabel.setText(getTimeRemainingBeforeWantedList(game));
 		}
 	}
 
@@ -130,8 +137,9 @@ public class MyGame extends Composite {
 		case ACTIVE:
 			if (game.getParticipationState() == ParticipationState.ACTIVE) {
 				// Show all the target time and stuff
-				targetLabel.setText(game.getTargetName() + " (" + game.getTargetAlias() + ")");
-				targetLabel.setHref("https://stanfordwho.stanford.edu/SWApp/Search.do?search=" + game.getTargetEmail());
+				targetLabel.setText(game.getTarget().getName() + " (" + game.getTarget().getAlias() + ")");
+				String email = game.getTarget().getEmail();
+				targetLabel.setHref(getStanfordWhoSearchURL(email));
 				timeRemainingLabel.setText(getTimeRemaining(game));
 				reportPanel.setVisible(true);
 				gameInfoPanel.setVisible(true);
@@ -164,9 +172,34 @@ public class MyGame extends Composite {
 			break;
 		}
 		
+		wantedListTable.clear();
+		if (game.getWantedList().length() == 0) {
+			Label l = new Label("Currently there is no one on the wanted list.");
+			wantedListTable.setWidget(0, 0, l);
+		} else {
+			for (int i = 0; i < game.getWantedList().length(); i++) {
+				Target t = game.getWantedList().get(i);
+				DisclosurePanel p = new DisclosurePanel(IconBundle.INSTANCE.minusIcon(), IconBundle.INSTANCE.plusIcon(), t.getName());
+				FlowPanel content = new FlowPanel();
+				content.add(new Label("Alias: " + t.getAlias()));
+				Anchor a = new Anchor("Find on Stanford Who", getStanfordWhoSearchURL(t.getEmail()));
+				content.add(a);
+				
+				p.setContent(content);
+				wantedListTable.setWidget(i, 0, p);
+			}
+		}
+		
 	}
 
-	private void addRow(String killer, String victim, String details,int likes,boolean isLiked,final int assassinationId,Date assassinationDate) {
+	private String getStanfordWhoSearchURL(String email) {
+		return "https://stanfordwho.stanford.edu/SWApp/Search.do?search=" + email;
+	}
+
+	private void addRow(final News news) {
+		String killer = news.getAssassinAlias();
+		String victim = news.getTargetName() + " (" + news.getTargetAlias() + ")";
+		
 		feedTable.insertRow(0);
 		HTMLTable newsFeed = new Grid(4,1);
 		newsFeed.getElement().addClassName("newsFeedBox");
@@ -176,33 +209,33 @@ public class MyGame extends Composite {
 		final HTMLTable assassinationRow = new Grid(1,1);
 		final HTMLTable controlRow = new Grid(1,2);
 		
-		assassinationRow.setHTML(0, 0,"<b>" + killer + " assassinated " + victim + ".</b>");
-		if (isLiked){
-			likePanel.add(new HTML("<b>You</b> and " + (likes -1) + " other people like this"));
+		assassinationRow.setHTML(0, 0,"<b>" + killer + " \u2192 " + victim + "</b>");
+		if (news.isLiked()){
+			likePanel.add(new HTML("<b>You</b> and " + (news.getLikes() -1) + " other people like this"));
 			
 		}
 		else{
-			likePanel.add(new HTML(likes + " people like this"));
+			likePanel.add(new HTML(news.getLikes() + " people like this"));
 		}  
 		newsFeed.setWidget(0, 0,assassinationRow);  
 		newsFeed.setWidget(2, 0,likePanel);  
 		
-		if (details != null && !"".equals(details)) {
-			newsFeed.setWidget(1, 0,new Label(details));  		
+		if (news.getdetails() != null && !"".equals(news.getdetails())) {
+			newsFeed.setWidget(1, 0,new Label(news.getdetails()));  		
 		} else {
 			newsFeed.setWidget(1, 0,new Label(""));  
 		}
 		 
-		String s = getTimeAgoString(assassinationDate);
+		String s = getTimeAgoString(news.getTime());
 	    
 	    controlRow.setWidget(0, 0,new Label(s));  
 	   
-	    if (!isLiked){
+	    if (!news.isLiked()){
 	    	final Anchor likeLink = new Anchor("Like");
 	    	likeLink.addClickHandler(new ClickHandler() {
 			
 	    		public void onClick(ClickEvent event) {
-	    			controller.like(MyGame.this, assassinationId);
+	    			controller.like(MyGame.this, news.getAssassinationId());
 				}
 	    	});
 	    	controlRow.setWidget(0, 1,likeLink); 
@@ -248,6 +281,20 @@ public class MyGame extends Composite {
 		long timeRemaining = game.getKillDeadline().getTime() - now.getTime();
 		timeRemaining = Math.max(timeRemaining, 0);
 		
+		return format(timeRemaining);
+	}
+	
+	private String getTimeRemainingBeforeWantedList(Game game) {
+		Date now = new Date();
+		
+		long timeRemaining = game.getWantedDeadline().getTime() - now.getTime();
+		timeRemaining = Math.max(timeRemaining, 0);
+		final long hours = timeRemaining / (1000*60*60);
+		NumberFormat f = NumberFormat.getFormat("00");
+		return f.format(hours); 
+	}
+
+	private String format(long timeRemaining) {
 		final long hours = timeRemaining / (1000*60*60);
 		timeRemaining -= hours*1000*60*60;
 		final long minutes = timeRemaining / (1000*60);
@@ -318,7 +365,7 @@ public class MyGame extends Composite {
 		showDisputeMessage(DisputeAgainst.TARGET);
 	}
 
-	public void showAssassinatedDialog(Game oldGame, Game newGame, final String assassinationId) {
+	public void showAssassinatedDialog(Game oldGame, Game newGame, final String assassinationId, Target target, NewsType newsType) {
 		HTMLPanel remainingCharsPanel = new HTMLPanel("Remaining characters: <span id='remainingCharsLabel' >");
 		final InlineLabel remainingCharsLabel = new InlineLabel("200");
 		remainingCharsPanel.addAndReplaceElement(remainingCharsLabel, "remainingCharsLabel");
@@ -347,9 +394,9 @@ public class MyGame extends Composite {
 
 		VerticalPanel dialogVPanel = new VerticalPanel();
 		dialogVPanel.addStyleName("dialogVPanel");
-		String html = "<b>Congratulation on assassinating " + oldGame.getTargetName() + "</b><br/>" ;
-		if (newGame.getGameState() == GameState.ACTIVE) {
-			html += "Your new target is " + newGame.getTargetName() + "(" + newGame.getTargetAlias()
+		String html = "<b>Congratulation on assassinating " + target.getName() + "</b><br/>" ;
+		if (newGame.getGameState() == GameState.ACTIVE && newsType == NewsType.NORMAL) {
+			html += "Your new target is " + newGame.getTarget().getName() + "(" + newGame.getTarget().getAlias()
 			+ ")" + "<br/>";
 		}
 		html += "If you have a good assassination story, share it here, to make the other players fear and respect your awesomeness:<br/>";
@@ -358,7 +405,7 @@ public class MyGame extends Composite {
 		dialogVPanel.add(detailsArea);
 		dialogVPanel.add(remainingCharsPanel);
 		dialogVPanel.add(okButton);
-		dialogBox.setWidth("400px");
+		dialogBox.setWidth("500px");
 		dialogBox.setWidget(dialogVPanel);
 
 		// Add a handler to close the DialogBox
@@ -370,8 +417,15 @@ public class MyGame extends Composite {
 			}
 		});
 
-		detailsArea.setFocus(true);
 		dialogBox.center();
+		DeferredCommand.addCommand(new Command() {
+			
+			public void execute() {
+				// TODO Auto-generated method stub
+				detailsArea.setFocus(true);
+				
+			}
+		});
 	}
 
 	/**
@@ -383,9 +437,8 @@ public class MyGame extends Composite {
 		feedTable.clear();
 		for (int i = newsArray.length() -1; i >= 0; i--) { // Do it backwards, because we insert things at the top
 			News news = newsArray.get(i);
-			System.out.println("News: game=" + news.getGameId() + " details:" + news.getdetails());
 			if (news.getGameId() == game.getGameId()) {
-				addRow(news.getAssassinAlias(), news.getTargetAlias() + " (" + news.getTargetName() + ")", news.getdetails(),news.getLikes(),news.isLiked(),news.getAssassinationId(),news.getTime());
+				addRow(news);
 			}
 		}
 	}

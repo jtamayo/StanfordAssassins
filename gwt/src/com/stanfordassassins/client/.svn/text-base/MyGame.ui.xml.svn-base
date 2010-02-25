@@ -68,6 +68,11 @@
 		}
 		
 		.gameInfoLabel {
+			margin-top: 8px;
+			font-size: 14px;
+		}
+		
+		.timerCaption {
 			font-size: 14px;
 		}
 		
@@ -75,7 +80,12 @@
 			width: 100%;
 		}
 		
-		.timer {
+		.smallTimer {
+			font-size: 26px;
+		}
+		
+		
+		.bigTimer {
 			font-size: 36px;
 		}
 		
@@ -100,13 +110,20 @@
 					<g:InlineLabel addStyleNames="{style.codeword}" ui:field="codewordLabel"/>
 				</g:HTMLPanel>
 				<g:VerticalPanel ui:field="gameInfoPanel" addStyleNames="{style.gameInfoPanel}" width="100%">
+					<g:HTMLPanel>
+					<g:Label addStyleNames="{style.gameInfoLabel}">You have</g:Label>
+					<g:Label addStyleNames="{style.gameInfo}, {style.bigTimer}" ui:field="timeRemainingLabel" />
+					<g:InlineLabel>hours to make a kill, and </g:InlineLabel>	<g:InlineLabel ui:field="timeBeforeWaitListLabel" />
+					<g:InlineLabel>hours before going in to the wanted list.</g:InlineLabel>
+					</g:HTMLPanel>
 					<g:Label addStyleNames="{style.gameInfoLabel}">Target</g:Label>
 					<g:Anchor stylePrimaryName="{style.target}" addStyleNames="{style.gameInfo}" ui:field="targetLabel" title="Look up your target on Stanford Who"/>
-					<g:Label addStyleNames="{style.gameInfo}, {style.timer}" ui:field="timeRemainingLabel" />
 					<g:HTMLPanel visible="false">
 						<div class="{style.gameInfoLabel}">Victims so far</div>
 						<g:Label addStyleNames="{style.gameInfo}" ui:field="killedLabel" />
 					</g:HTMLPanel>
+					<g:Label addStyleNames="{style.gameInfoLabel}">Wanted List</g:Label>					
+					<g:FlexTable ui:field="wantedListTable"/>
 				</g:VerticalPanel>
 				
 				<g:HTMLPanel ui:field="myGameContentPanel">

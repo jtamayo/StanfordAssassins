@@ -1,8 +1,8 @@
 <?php
-
-include "twitter_login.php";
 require_once('emails.php');
 require_once('db_login.php');
+require_once('common.php');
+
 function handleStartDispute($accuserId, $defendantId, $won, $accusation) {
 	
 }
@@ -13,7 +13,7 @@ function handleGameOver($gameId) {
 	// get winner name alias
 	$sql  = " SELECT players.playerId, players.name, participations.alias ";
 	$sql .= " FROM players INNER JOIN participations ON players.playerId = participations.playerId ";
-	$sql .= " WHERE participations.gameId='$gameId' AND participations.status = 'WON' LIMIT 1;";
+	$sql .= " WHERE participations.gameId='$gameId' AND participations.state = 'WON' LIMIT 1;";
 	$result = mysql_query($sql) or sql_error_report($sql);
 	if($row = mysql_fetch_assoc($result)) {
 		$winnerId = $row['playerId'];
@@ -44,26 +44,27 @@ function handlePlayerAssassinated($playerId) {
 }
 
 function handleAddDetails($assassinationId) {
-	$sql = "SELECT assassinationId,games.name as gameName,killer.alias as killerName,victim.alias as victimName, details 
-		FROM assassinations INNER JOIN games on assassinations.gameId = games.gameId
-		INNER JOIN participations as killer ON assassinId = killer.playerId
-		INNER JOIN participations as victim  ON victimId = victim.playerId
-		WHERE assassinationId='$assassinationId' AND killer.gameId = games.gameId AND victim.gameId = games.gameId" ;
-		
-	$result = mysql_query($sql) or sql_error_report($sql);
-	if($row = mysql_fetch_assoc($result)) {			
-			$twi_user = getTwitterConnector();
+	require_once("twitter_login.php");
+	require_once("facebook_login.php");
+		$sql = "SELECT assassinationId,games.name as gameName,killer.alias as killerName,victim.alias as victimName, details 
+			FROM assassinations INNER JOIN games on assassinations.gameId = games.gameId
+			INNER JOIN participations as killer ON assassinId = killer.playerId
+			INNER JOIN participations as victim  ON victimId = victim.playerId
+			WHERE assassinationId='$assassinationId' AND killer.gameId = games.gameId AND victim.gameId = games.gameId LIMIT 1;";
+			
+		$result = mysql_query($sql) or sql_error_report($sql);
+	
+	
+	
+		if($row = mysql_fetch_assoc($result)) {			
 			$hash_tag = "#".str_replace (" ", "", $row['gameName']) ;
 			$kill_tag = $row['killerName']. "->". $row['victimName'] . ":" ;
 			$header = $hash_tag . " " .$kill_tag ;
+			$header = $hash_tag . " " .$kill_tag ;
 			$user_text = $header. " " .$row['details'];
 			
-			if (strlen($user_text)>140 ){
-			//TODO HAS TO CHECK FOR MORE CASES
-				$result = $twi_user->updateStatus(substr( $user_text,0,strrpos( $user_text , " " ,-(strlen( $user_text)-137))) . "...");
-				$result = $twi_user->updateStatus($hash_tag . " ...".substr( $user_text,strrpos( $user_text , " " ,-(strlen($user_text )-137))));
-				
-			}
+			postToTwitter($user_text );
+			postToFacebook($user_text );
 		}
 }
 
@@ -130,8 +131,10 @@ function handleGameStart($gameId) {
 	$gameName = getGameName($gameId);
 	
 	$sql  = "SELECT assassin.email, assassinPart.codeword, victimPart.alias, victim.name ";
-	$sql .= "FROM assassinations INNER JOIN players AS assassin ON assassinations.assassinId = assassin.playerId ";
+	$sql .= "FROM assassinations ";
+	$sql .= "INNER JOIN players AS assassin ON assassinations.assassinId = assassin.playerId ";
 	$sql .= "INNER JOIN players AS victim ON assassinations.victimId = victim.playerId ";
+	$sql .= "INNER JOIN participations AS assassinPart ON assassinations.gameId = assassinPart.gameId AND assassinations.assassinId = assassinPart.playerId ";
 	$sql .= "INNER JOIN participations AS victimPart ON assassinations.gameId = victimPart.gameId AND assassinations.victimId = victimPart.playerId ";
 	$sql .= "WHERE assassinations.gameId='$gameId' AND assassinations.state = 'PENDING' AND victimPart.state = 'ACTIVE';";
 	$result = mysql_query($sql) or sql_error_report($sql);
@@ -164,5 +167,41 @@ function getPlayerName($playerId) {
 		$ret = array("status" => "IMPOSSIBLE4");
 		die(json_encode($ret));
 	}
+}
+
+function postToTwitter($post) {
+	
+	$twi_user = getTwitterConnector()	;
+	
+	if (strlen($post)>140 ){
+		//TODO HAS TO CHECK FOR MORE CASES
+		$result = $twi_user->updateStatus(substr( $post,0,strrpos( $post , " " ,-(strlen( $post)-137))) . "...");
+		$result = $twi_user->updateStatus($hash_tag . " ...".substr( $post,strrpos( $post , " " ,-(strlen($post )-137))));
+	}else{
+		$result = $twi_user->updateStatus($post);
+	}
+}
+
+function postToFacebook($post) {
+	
+	$facebook = getFacebookConnector();
+
+	$page_id = '325648886259'; 
+	return $facebook->api_client->stream_publish( $post,null,null,null,$page_id );
+	
+}
+
+function sql_error_report($sql) {		
+	$date = getDateNow();
+	$sqlError = mysql_error();
+	mysql_query(sprintf("INSERT INTO errors (type, error, extra, date) VALUES ('SQL', '%s', 'gameserver:%s', '%s');", addslashes($sqlError), addslashes($sql), $date));
+	
+	$ret = array(
+		"status" => "SQL_ERROR",
+		"error" => $sqlError,
+		"sql" => $sql
+	);
+	
+	die(json_encode($ret));
 }
 ?>

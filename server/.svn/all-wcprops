@@ -1,25 +1,37 @@
 K 25
 svn:wc:ra_dav:version-url
 V 29
-/svn/!svn/ver/79/trunk/server
+/svn/!svn/ver/96/trunk/server
 END
 make_game_deamon.php
 K 25
 svn:wc:ra_dav:version-url
 V 50
-/svn/!svn/ver/79/trunk/server/make_game_deamon.php
+/svn/!svn/ver/96/trunk/server/make_game_deamon.php
 END
 twitter_login.php
 K 25
 svn:wc:ra_dav:version-url
 V 47
-/svn/!svn/ver/73/trunk/server/twitter_login.php
+/svn/!svn/ver/90/trunk/server/twitter_login.php
 END
 gameserver.php
 K 25
 svn:wc:ra_dav:version-url
 V 44
-/svn/!svn/ver/79/trunk/server/gameserver.php
+/svn/!svn/ver/96/trunk/server/gameserver.php
+END
+facebook_mobile.php
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/85/trunk/server/facebook_mobile.php
+END
+facebook_login.php
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/92/trunk/server/facebook_login.php
 END
 twitter.php
 K 25
@@ -31,19 +43,19 @@ manage_game_deamon.php
 K 25
 svn:wc:ra_dav:version-url
 V 52
-/svn/!svn/ver/79/trunk/server/manage_game_deamon.php
+/svn/!svn/ver/96/trunk/server/manage_game_deamon.php
 END
 rules.html
 K 25
 svn:wc:ra_dav:version-url
 V 40
-/svn/!svn/ver/54/trunk/server/rules.html
+/svn/!svn/ver/96/trunk/server/rules.html
 END
 login.php
 K 25
 svn:wc:ra_dav:version-url
 V 39
-/svn/!svn/ver/79/trunk/server/login.php
+/svn/!svn/ver/80/trunk/server/login.php
 END
 logout.php
 K 25
@@ -51,17 +63,17 @@ svn:wc:ra_dav:version-url
 V 40
 /svn/!svn/ver/70/trunk/server/logout.php
 END
+facebook.php
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/85/trunk/server/facebook.php
+END
 emails.php
 K 25
 svn:wc:ra_dav:version-url
 V 40
-/svn/!svn/ver/75/trunk/server/emails.php
-END
-handler.php
-K 25
-svn:wc:ra_dav:version-url
-V 41
-/svn/!svn/ver/75/trunk/server/handler.php
+/svn/!svn/ver/96/trunk/server/emails.php
 END
 db_login.php
 K 25
@@ -69,11 +81,23 @@ svn:wc:ra_dav:version-url
 V 42
 /svn/!svn/ver/11/trunk/server/db_login.php
 END
+handler.php
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/!svn/ver/96/trunk/server/handler.php
+END
 test.php
 K 25
 svn:wc:ra_dav:version-url
 V 38
-/svn/!svn/ver/75/trunk/server/test.php
+/svn/!svn/ver/96/trunk/server/test.php
+END
+facebookapi_php5_restlib.php
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/85/trunk/server/facebookapi_php5_restlib.php
 END
 .htaccess
 K 25
@@ -81,15 +105,15 @@ svn:wc:ra_dav:version-url
 V 39
 /svn/!svn/ver/31/trunk/server/.htaccess
 END
-common.php
-K 25
-svn:wc:ra_dav:version-url
-V 40
-/svn/!svn/ver/79/trunk/server/common.php
-END
 admin.php
 K 25
 svn:wc:ra_dav:version-url
 V 39
 /svn/!svn/ver/76/trunk/server/admin.php
+END
+common.php
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/96/trunk/server/common.php
 END

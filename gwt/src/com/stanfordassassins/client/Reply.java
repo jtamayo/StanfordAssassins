@@ -58,5 +58,25 @@ public class Reply extends JavaScriptObject {
 	private final native String getDisputeStr() /*-{
 		return this.dispute;
 	}-*/;
+	
+	
+	/**
+	 * When there's an assassination, I need to know who died, because it might not have been
+	 * my assassin.
+	 * @return
+	 */
+	public final native Target getVictim() /*-{
+		return this.victim;
+	}-*/;
+
+	
+	public final NewsType getAssassinationType() {
+		return NewsType.valueOf(getAssassinationTypeStr());
+	}
+	
+	private final native String getAssassinationTypeStr() /*-{
+		return this.assassinationType;
+	}-*/;
+
 
 }

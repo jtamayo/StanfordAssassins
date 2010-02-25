@@ -27,7 +27,7 @@
 			<g:Anchor ui:field="logOutAnchor" addStyleNames="{style.logout}" href="#" text="Log out"/>
 		</div>
 		<div class="{style.main}">
-			<g:Image url="images/logo1.png"></g:Image>
+			<g:Image url="images/logo.png"></g:Image>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder> 

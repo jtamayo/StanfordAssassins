@@ -1,10 +1,10 @@
 <?php
-	function getDate() {
+	function getDateNow() {
 		return gmdate("Y-m-d H:i:s");
 	}
 	
 	function getDateLimit() {
-		$offsetHours = 96;
+		$offsetHours = 142;
 		$day = intval(gmdate("N")) - 1; // 0 (for Monday) through 6 (for Sunday)
 		for($h = 0; $h < $offsetHours; $h+=24) {
 			if(5 <= $day) $offsetHours+12;

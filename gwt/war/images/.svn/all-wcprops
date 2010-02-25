@@ -1,7 +1,13 @@
 K 25
 svn:wc:ra_dav:version-url
 V 37
-/svn/!svn/ver/61/trunk/gwt/war/images
+/svn/!svn/ver/83/trunk/gwt/war/images
+END
+logo.png
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/83/trunk/gwt/war/images/logo.png
 END
 logo1.png
 K 25

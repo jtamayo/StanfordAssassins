@@ -38,7 +38,7 @@
 		$playerNumber = count($players);
 		if($playerNumber < 3) return;
 				
-		$date = getDate();
+		$date = getDateNow();
 		$dateLimit = getDateLimit();
 		$codewords = array('age','air','anger','animal','answer','apple','area','arm','art','atom','baby','back','ball','band','bank','bar','base','bat','bear','beauty','bell','bird','bit','block','blood','blow','board','boat','body','bone','book','bottom','box','boy','branch','bread','break','brother','call','camp','capital','captain','car');
 		shuffle($codewords);
@@ -90,6 +90,10 @@
 		
 		$sql = "UPDATE players SET waitingAlias='', waitingStart='0000-00-00 00:00:00', state='PLAYING' WHERE playerId IN ($playerList);";
 		mysql_query($sql) or sql_error_report($sql);
+		
+		require_once('handler.php');
+		
+		handleGameStart($gameId);
 	}
 	
 	function trace($str) {
@@ -98,7 +102,7 @@
 	}
 	
 	function sql_error_report($sql) {		
-		$date = getDate();
+		$date = getDateNow();
 		$sqlError = mysql_error();
 		mysql_query(sprintf("INSERT INTO errors (type, error, extra, date) VALUES ('SQL', '%s', 'make_game_deamon:%s', '%s');", addslashes($sqlError), addslashes($sql), $date));
 		die($sqlError . "\n" . $sql);

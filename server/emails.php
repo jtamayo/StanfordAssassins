@@ -17,7 +17,7 @@ END_OF_BODY;
 
 <p>Whoever assassinates the other wins this game.</p>
 
-<p>You both have 96 hours.</p>
+<p>You both have 142 hours.</p>
 
 <p>Go to the <a href="http://stanfordassassins.com/?t=$gameTag">game page</a>.</p>
 END_OF_BODY;
@@ -45,7 +45,7 @@ END_OF_BODY;
 
 <p>Your codeword for this game is <b>$codeword</b>; keep it on you at all times.</p>
 
-<p>Your target for now is $targetName ($targetAlias). You have 96 hours to complete and report the assassination.</p>
+<p>Your target for now is $targetName ($targetAlias). You have 142 hours to complete and report the assassination.</p>
 
 <p>The guild should not need to remind you to stay within the rules at all times. You can view the rules <a href="http://stanfordassassins.com/rules.html">here</a></p>
 
@@ -94,7 +94,7 @@ END_OF_BODY;
 		$gameTag = str_replace(' ', '', $gameName);
 		$subject  = "Your target has changed";
 		$body = <<<END_OF_BODY
-<p>Your new target is $targetName (who goes by the alias of $targetAlias). The assassination timer has been reset to 96 hours.</p>
+<p>Your new target is $targetName (who goes by the alias of $targetAlias). The assassination timer has been reset to 142 hours.</p>
 
 <p>The guild should not need to remind you to stay within <a href="http://stanfordassassins.com/rules.html">the rules</a> at all times.</p>
 
@@ -192,11 +192,11 @@ END_OF_EMAIL;
 		if(strstr($email, 'test.edu') === false) {
 			return mail($email, $subject, $message, $headers);
 		} else {
-			echo "==== START SEND EMAIL =====================\n";
+			echo "/*== START SEND EMAIL =====================\n";
 			echo "TO: $email\n";
 			echo "SUBJECT: $subject\n";
 			echo "$body\n";
-			echo "===== END SEND EMAIL ======================\n";
+			echo "===== END SEND EMAIL ====================*/\n";
 			return true;
 		}
 	}
