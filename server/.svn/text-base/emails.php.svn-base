@@ -58,6 +58,22 @@ END_OF_BODY;
 		return sendHtmlEmail($email, $subject, $body);
 	}
 	
+	function sendGamePending($email, $gameName, $alias) {
+		$gameTag = str_replace(' ', '', $gameName);
+		$subject  = "$gameName will start soon";
+		$body = <<<END_OF_BODY
+<p>$alias,</p>
+
+<p>$gameName will start in 24 hours so get ready.</p>
+
+<p>While you are waiting you can brush up on the rules <a href="http://stanfordassassins.com/rules.html">here</a></p>
+
+<p>Go to the <a href="http://stanfordassassins.com/?t=$gameTag">game page</a>.</p>
+
+END_OF_BODY;
+		return sendHtmlEmail($email, $subject, $body);
+	}
+	
 	function sendBeenAssassinated($email, $assassinAlias, $assassinName, $details) {
 		$gameTag = str_replace(' ', '', $gameName);
 		$subject  = 'You have been assassinated';

@@ -77,6 +77,11 @@ public class Reply extends JavaScriptObject {
 	private final native String getAssassinationTypeStr() /*-{
 		return this.assassinationType;
 	}-*/;
+	
+	public native final JsArray<Token> getTokens() /*-{
+		return this.tokens;
+	}-*/;
+
 
 
 }

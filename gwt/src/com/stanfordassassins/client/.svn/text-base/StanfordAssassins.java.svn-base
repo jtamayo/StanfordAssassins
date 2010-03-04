@@ -50,8 +50,8 @@ public class StanfordAssassins implements EntryPoint {
 	}
 	
 	private static final Method METHOD = RequestBuilder.POST;
-//	public static String SERVER_URL = "../gameserver.php";
-	public static String SERVER_URL = "http://localhost:8888/proxy";
+	public static String SERVER_URL = "../gameserver.php";
+//	public static String SERVER_URL = "http://localhost:8888/proxy";
 
 	/**
 	 * ID for the content div in the ui.xml
@@ -96,15 +96,12 @@ public class StanfordAssassins implements EntryPoint {
 		
 		RequestParameters p = new RequestParameters();
 		p.put("cmd", ServerOperations.allData);
-		// "cmd=" + ServerOperations.allData
 		request(p, new MyCallback() {
-			
 			public void onResponseReceived(Request request, Response response) {
 				if (200 == response.getStatusCode()) {
 					Reply reply = Reply.asReply(response.getText());
-					System.err.println(response.getText());
 					if (reply.getStatus() == ServerResults.OK) {
-						allDataOK(reply.getPlayer(), reply.getGames(), reply.getNews());
+						allDataOK(reply.getPlayer(), reply.getGames(), reply.getNews(), reply.getTokens());
 					} else {
 						// Authentication failed, redirect to home page
 						redirect("http://stanfordassassins.com/login.php"); 
@@ -155,7 +152,7 @@ public class StanfordAssassins implements EntryPoint {
 		return game.getName().replace(" ", "");
 	}
 
-	public void allDataOK(Player player, JsArray<Game> games, JsArray<News> news) {
+	public void allDataOK(Player player, JsArray<Game> games, JsArray<News> news, JsArray<Token> tokens) {
 		RootPanel.get(CONTENT).clear();
 		this.player = player;
 		this.appState = ApplicationState.LOGGED_IN;
@@ -163,14 +160,14 @@ public class StanfordAssassins implements EntryPoint {
 		tabPanel = new TabPanel();
 		if (shouldDisplayJoinPage(player)) {
 			// Display the join page only if the player is not playing a game
-			joinPage = new Join(this, player);
+			joinPage = new Join(this, player, tokens);
 			tabPanel.add(joinPage, "Join");
 		}
 		// First add the active games, in the order received (which should be descending by game id)
 		int gamesAdded = 0;
 		for (int i = 0; i < games.length(); i++) {
 			Game game = games.get(i);
-			if (game.getGameState() == GameState.ACTIVE) {
+			if (game.getGameState() == GameState.ACTIVE || game.getGameState() == GameState.PENDING) {
 				this.games.add(game);
 				MyGame gameWidget = new MyGame(game, this);
 				gameWidget.updateNews(news);
@@ -209,7 +206,7 @@ public class StanfordAssassins implements EntryPoint {
 		tabPanel.add(leaderboard, "Leader Board");
 		loadLeaderboard();
 		loadPlayerStats();
-		// Register the click listener with the tab panel, so that we can add the login.
+		// Register the click listener with the tab panel, so that we can add the logging.
 		// add it before selecting the tab, so it fires the event and we can add it to the history
 		tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
 			public void onSelection(SelectionEvent<Integer> event) {
@@ -248,15 +245,24 @@ public class StanfordAssassins implements EntryPoint {
 	}
 
 	private boolean shouldDisplayJoinPage(Player player) {
+//		return true;
 		return player.getState() == PlayerState.NOTHING || player.getState() == PlayerState.WAITING;
 	}
 	
-	public void onJoin(final String alias) {
+	public void onJoin(final String alias, String dorm, String department) {
 		// TODO: Check for SQL injection on alias
 		RequestParameters p = new RequestParameters();
 		p.put("cmd", ServerOperations.joinGame);
 		p.put("alias", alias);
-		//"cmd=" + ServerOperations.joinGame + "&alias=" + alias
+		if (dorm != null && department != null) {
+			p.put("tokens", dorm + ";" + department);
+		} else if (dorm != null) {
+			p.put("tokens", dorm);
+		} else if (department != null) {
+			p.put("tokens", department);
+		} else {
+			p.put("tokens", "");
+		}
 		
 		request(p, new MyCallback() {
 			
@@ -264,7 +270,7 @@ public class StanfordAssassins implements EntryPoint {
 				if (200 == response.getStatusCode()) {
 					Reply reply = Reply.asReply(response.getText());
 					if (reply.getStatus() == ServerResults.OK) {
-						joinOK(reply.getPlayer());
+						joinOK(reply.getPlayer(), reply.getGame(), reply.getNews());
 					} else if (reply.getStatus() == ServerResults.ALIAS_TAKEN) {
 						joinAliasTaken(alias);
 					} else if (reply.getStatus() == ServerResults.BAD_STATE) {
@@ -293,7 +299,6 @@ public class StanfordAssassins implements EntryPoint {
 		// TODO: Fix the layout, it's just not working!
 		
 		final DialogBox dialogBox = new DialogBox();
-//		dialogBox.setWidth("60%");
 		dialogBox.setText("Alert");
 		final Button okButton = new Button("OK");
 		okButton.addStyleName("dialogOKButton");
@@ -317,14 +322,25 @@ public class StanfordAssassins implements EntryPoint {
 	
 	}
 
-	protected void joinOK(Player player) {
+	protected void joinOK(Player player, Game game, JsArray<News> news) {
 		// Switch to the old page, and replace the player object
 		this.player = player;
-		joinPage.updatePlayer(player);
+		if (player.getState() == PlayerState.WAITING) {
+			// The game has not started, simply update the join page
+			joinPage.updatePlayer(player);
+		} else {
+			// Destroy the join page, and create a new game tab
+			tabPanel.remove(joinPage);
+			joinPage = null;
+			this.games.add(game);
+			MyGame gameWidget = new MyGame(game, this);
+			gameWidget.updateNews(news);
+			tabPanel.insert(gameWidget, game.getName(), 0);
+			tabPanel.selectTab(0);
+		}
 	}
 	
 	protected void leaderboardOK(JsArray<PlayerStats> stats) {
-		// Switch to the old page, and replace the stats
 		leaderboard.update(stats,player.getPlayerId());
 	}
 
@@ -340,9 +356,7 @@ public class StanfordAssassins implements EntryPoint {
 		p.put("cmd", ServerOperations.reportAssassination);
 		p.put("codeword", codeword);
 		p.put("gameId", gameId);
-		//"cmd=" + ServerOperations.reportAssassination + "&codeword=" + codeword + "&gameId=" + gameId
 		request(p, new MyCallback() {
-			
 			public void onResponseReceived(Request request, Response response) {
 				if (200 == response.getStatusCode()) {
 					Reply reply = Reply.asReply(response.getText());
@@ -380,12 +394,10 @@ public class StanfordAssassins implements EntryPoint {
 
 	public void addAssassinationDetails(final MyGame game, String details, String assassinationId) {
 		// TODO: Check for SQL injection on alias
-		// TODO: Convert this to a POST request
 		RequestParameters p = new RequestParameters();
 		p.put("cmd", ServerOperations.addDetails);
 		p.put("assassinationId", assassinationId);
 		p.put("details", details);
-		//"cmd=" + ServerOperations.addDetails + "&assassinationId=" + assassinationId + "&details=" + details
 		request(p, new MyCallback() {
 			public void onResponseReceived(Request request, Response response) {
 				if (200 == response.getStatusCode()) {
@@ -406,7 +418,6 @@ public class StanfordAssassins implements EntryPoint {
 	public void loadLeaderboard(){
 		RequestParameters p = new RequestParameters();
 		p.put("cmd", ServerOperations.getLeaderboard);
-		//"cmd=" + ServerOperations.getLeaderboard
 		request(p, new MyCallback() {
 			public void onResponseReceived(Request request, Response response) {
 				if (200 == response.getStatusCode()) {
@@ -448,7 +459,6 @@ public class StanfordAssassins implements EntryPoint {
 	public void loadPlayerStats(){
 		RequestParameters p = new RequestParameters();
 		p.put("cmd", ServerOperations.getPlayerStats);
-		// "cmd=" + ServerOperations.getPlayerStats
 		request(p, new MyCallback() {
 			public void onResponseReceived(Request request, Response response) {
 				if (200 == response.getStatusCode()) {
@@ -469,7 +479,6 @@ public class StanfordAssassins implements EntryPoint {
 		RequestParameters p = new RequestParameters();
 		p.put("cmd", ServerOperations.reportLike);
 		p.put("assassinationId", assassinationId);
-		// "cmd=" + ServerOperations.reportLike + "&assassinationId=" + assassinationId
 		request(p, new MyCallback() {
 			
 			public void onResponseReceived(Request request, Response response) {
@@ -521,10 +530,6 @@ public class StanfordAssassins implements EntryPoint {
 	}
 
 	public void submitDispute(String reason, final DisputeAgainst against, final MyGame gamePage, final DialogBox dialogBox) {
-//		String data = "cmd=" + ServerOperations.startDispute;
-//		data += "&against="  + (against == DisputeAgainst.TARGET ? "TAR" : "ASS");
-//		data += "&description=" + reason;
-//		data += "&gameId=" + gamePage.game.getGameId();
 		RequestParameters p = new RequestParameters();
 		p.put("cmd", ServerOperations.startDispute);
 		p.put("against", (against == DisputeAgainst.TARGET ? "TAR" : "ASS"));
@@ -560,6 +565,7 @@ public class StanfordAssassins implements EntryPoint {
 	 * @param dispute either 
 	 */
 	protected void disputeOK(DisputeResult result, Game newGame, MyGame gamePage) {
+		// TODO: display a nicer alert
 		if (result == DisputeResult.SUCCESS) {
 			Window.alert("The dispute was resolved in your favor.");
 		} else {

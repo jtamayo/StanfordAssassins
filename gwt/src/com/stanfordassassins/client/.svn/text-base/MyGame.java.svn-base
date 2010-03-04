@@ -71,7 +71,7 @@ public class MyGame extends Composite {
 	@UiField
 	FlexTable feedTable;
 	@UiField
-	HTMLPanel myGameContentPanel;
+	HTML myGameContentPanel;
 	@UiField
 	HTMLPanel reportPanel;
 	@UiField
@@ -84,6 +84,12 @@ public class MyGame extends Composite {
 	Label disputeWithAssassinAnchor;
 	@UiField
 	FlexTable wantedListTable;
+	@UiField
+	HTMLPanel obituariesPanel;
+	@UiField
+	HTMLPanel mainbarHiddenPanel;
+	@UiField
+	Label timeToStartLabel;
 
 	public MyGame(Game game, StanfordAssassins controller) {
 		
@@ -109,6 +115,10 @@ public class MyGame extends Composite {
 		if (game.getGameState() == GameState.ACTIVE && game.getParticipationState() == ParticipationState.ACTIVE) {
 			timeRemainingLabel.setText(getTimeRemaining(game));
 			timeBeforeWaitListLabel.setText(getTimeRemainingBeforeWantedList(game));
+		} else if (game.getGameState() == GameState.PENDING && game.getParticipationState() == ParticipationState.ACTIVE) {
+			long timeRemaining = game.getStartDate().getTime() - new Date().getTime();
+			timeRemaining = Math.max(timeRemaining, 0);
+			timeToStartLabel.setText(format(timeRemaining));
 		}
 	}
 
@@ -145,12 +155,12 @@ public class MyGame extends Composite {
 				gameInfoPanel.setVisible(true);
 			} else if (game.getParticipationState() == ParticipationState.ASSASSINATED) {
 				// Write "game over"
-				myGameContentPanel.addAndReplaceElement(new HTML("<h2>Game Over</h2> You've been assassinated, but you can still monitor the progress of the game in the game news."), "statusText");
+				myGameContentPanel.setHTML("<h2>Game Over</h2> You've been assassinated, but you can still monitor the progress of the game in the game news.");
 				reportPanel.setVisible(false);
 				gameInfoPanel.setVisible(false);
 			} else if (game.getParticipationState() == ParticipationState.KICKED) {
 				// Write "game over"
-				myGameContentPanel.addAndReplaceElement(new HTML("<h2>Game Over</h2> You have failed to make an assassination in time, and you have been removed from this game."), "statusText");
+				myGameContentPanel.setHTML("<h2>Game Over</h2> You have failed to make an assassination in time, and you have been removed from this game.");
 				reportPanel.setVisible(false);
 				gameInfoPanel.setVisible(false);
 			}
@@ -158,15 +168,18 @@ public class MyGame extends Composite {
 		case FINISHED:
 			// TODO: Show some statistics after the game is over
 			if (game.getParticipationState() == ParticipationState.WON) {
-				myGameContentPanel.addAndReplaceElement(new HTML("<h2>Winner</h2> You are the last assassin standing. Congratulations!"), "statusText");
+				myGameContentPanel.setHTML("<h2>Winner</h2> You are the last assassin standing. Congratulations!");
 			} else {
-				myGameContentPanel.addAndReplaceElement(new HTML("<h2>Game Over</h2> The game has finished. Check the news for details on the winner."), "statusText");
+				myGameContentPanel.setHTML("<h2>Game Over</h2> The game has finished. Check the news for details on the winner.");
 			}
 			reportPanel.setVisible(false);
 			gameInfoPanel.setVisible(false);
 			break;
 		case PENDING:
-			//Do nothing, it should never happen
+			reportPanel.setVisible(false);
+			gameInfoPanel.setVisible(false);
+			obituariesPanel.setVisible(false);
+			mainbarHiddenPanel.setVisible(true);
 			break;
 		default:
 			break;

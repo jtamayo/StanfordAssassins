@@ -3,6 +3,8 @@ package com.stanfordassassins.client;
 import java.util.Date;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.i18n.client.DateTimeFormat;
 
 public class Player extends JavaScriptObject {
@@ -47,5 +49,10 @@ public class Player extends JavaScriptObject {
 		DateTimeFormat format = DateTimeFormat.getFormat("yyyy-MM-dd hh:mm:ss zzz");
 		return format.parse(getWaitingStartString() + " GMT");
 	}
+	
+	public native final JsArrayString getTokens() /*-{
+		return this.tokens;
+	}-*/;
+
 
 }

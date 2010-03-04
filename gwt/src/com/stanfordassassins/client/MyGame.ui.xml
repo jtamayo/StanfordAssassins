@@ -126,11 +126,14 @@
 					<g:FlexTable ui:field="wantedListTable"/>
 				</g:VerticalPanel>
 				
-				<g:HTMLPanel ui:field="myGameContentPanel">
-				<div id="statusText" addStyleNames="{style.sidebar}"></div>
-				</g:HTMLPanel>
+				<g:HTML ui:field="myGameContentPanel" />
 			</td>
 			<td class="{style.mainbar}">
+				<g:HTMLPanel ui:field="mainbarHiddenPanel" visible="false">
+				<h2>Get Set</h2>
+				A new game will start in <g:Label ui:field="timeToStartLabel" addStyleNames="{style.smallTimer}"/>
+				You'll be informed of your target once the game starts.
+				</g:HTMLPanel>
 			
 				<g:HTMLPanel ui:field="reportPanel">
 					<h3 class="{style.subheader}">Report an assassination</h3>
@@ -143,7 +146,7 @@
 					</g:VerticalPanel> 
 					</g:HorizontalPanel>
 				</g:HTMLPanel>
-				<g:HTMLPanel>
+				<g:HTMLPanel ui:field="obituariesPanel">
 					<h3 class="{style.subheader}">Obituaries</h3>
 					<g:FlexTable ui:field="feedTable" addStyleNames="{style.feedTable}"/>
 				</g:HTMLPanel>

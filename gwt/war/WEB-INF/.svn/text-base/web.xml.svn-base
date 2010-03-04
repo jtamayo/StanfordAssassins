@@ -16,6 +16,11 @@
     <url-pattern>/proxy</url-pattern>
   </servlet-mapping>
   
+  <servlet-mapping>
+    <servlet-name>proxy</servlet-name>
+    <url-pattern>/gameserver.php</url-pattern>
+  </servlet-mapping>
+  
   <!-- Default page to serve -->
   <welcome-file-list>
     <welcome-file>StanfordAssassins.html</welcome-file>

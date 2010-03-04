@@ -1,13 +1,13 @@
 K 25
 svn:wc:ra_dav:version-url
-V 29
-/svn/!svn/ver/96/trunk/server
+V 30
+/svn/!svn/ver/112/trunk/server
 END
 make_game_deamon.php
 K 25
 svn:wc:ra_dav:version-url
-V 50
-/svn/!svn/ver/96/trunk/server/make_game_deamon.php
+V 51
+/svn/!svn/ver/112/trunk/server/make_game_deamon.php
 END
 twitter_login.php
 K 25
@@ -18,8 +18,8 @@ END
 gameserver.php
 K 25
 svn:wc:ra_dav:version-url
-V 44
-/svn/!svn/ver/96/trunk/server/gameserver.php
+V 45
+/svn/!svn/ver/112/trunk/server/gameserver.php
 END
 facebook_mobile.php
 K 25
@@ -43,7 +43,13 @@ manage_game_deamon.php
 K 25
 svn:wc:ra_dav:version-url
 V 52
-/svn/!svn/ver/96/trunk/server/manage_game_deamon.php
+/svn/!svn/ver/97/trunk/server/manage_game_deamon.php
+END
+setupdb.php
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/112/trunk/server/setupdb.php
 END
 rules.html
 K 25
@@ -72,8 +78,8 @@ END
 emails.php
 K 25
 svn:wc:ra_dav:version-url
-V 40
-/svn/!svn/ver/96/trunk/server/emails.php
+V 41
+/svn/!svn/ver/109/trunk/server/emails.php
 END
 db_login.php
 K 25
@@ -84,8 +90,8 @@ END
 handler.php
 K 25
 svn:wc:ra_dav:version-url
-V 41
-/svn/!svn/ver/96/trunk/server/handler.php
+V 42
+/svn/!svn/ver/112/trunk/server/handler.php
 END
 test.php
 K 25
@@ -114,6 +120,6 @@ END
 common.php
 K 25
 svn:wc:ra_dav:version-url
-V 40
-/svn/!svn/ver/96/trunk/server/common.php
+V 41
+/svn/!svn/ver/109/trunk/server/common.php
 END

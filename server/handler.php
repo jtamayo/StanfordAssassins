@@ -14,7 +14,7 @@ function handleGameOver($gameId) {
 	$sql  = " SELECT players.playerId, players.name, participations.alias ";
 	$sql .= " FROM players INNER JOIN participations ON players.playerId = participations.playerId ";
 	$sql .= " WHERE participations.gameId='$gameId' AND participations.state = 'WON' LIMIT 1;";
-	$result = mysql_query($sql) or sql_error_report($sql);
+	$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 	if($row = mysql_fetch_assoc($result)) {
 		$winnerId = $row['playerId'];
 		$winnerName = $row['name'];
@@ -27,7 +27,7 @@ function handleGameOver($gameId) {
 	
 	// get all the players
 	$sql = "SELECT players.playerId, players.name, players.email FROM players INNER JOIN participations ON players.playerId = participations.playerId WHERE participations.gameId = '$gameId';";
-	$result = mysql_query($sql) or sql_error_report($sql);
+	$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 	while($row = mysql_fetch_assoc($result)) {
 		if($row['playerId'] == $winnerId) {
 			// Send "you won"
@@ -52,7 +52,7 @@ function handleAddDetails($assassinationId) {
 			INNER JOIN participations as victim  ON victimId = victim.playerId
 			WHERE assassinationId='$assassinationId' AND killer.gameId = games.gameId AND victim.gameId = games.gameId LIMIT 1;";
 			
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 	
 	
 	
@@ -80,7 +80,7 @@ function handleTargetChanged($playerId, $gameId) {
 	$sql .= " FROM players INNER JOIN participations ON participations.playerId = players.playerId ";
 	$sql .= " INNER JOIN assassinations ON participations.playerId = assassinations.victimId ";
 	$sql .= " WHERE participations.gameId = '$gameId' AND assassinations.assassinId = '$victimId' AND assassinations.state='PENDING' AND participations.state='ACTIVE' LIMIT 1;";
-	$result = mysql_query($sql) or sql_error_report($sql);
+	$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 	if($row = mysql_fetch_assoc($result)) {
 		sendTargetChanged($playerEmail, $gameName, $row['newVictimAlias'], $row['newVictimName']);
 	}
@@ -93,7 +93,7 @@ function handleDeathmatch($gameId) {
 	$sql .= " FROM players INNER JOIN participations ON players.playerId = participations.playerId ";
 	$sql .= " INNER JOIN assassinations ON players.playerId = assassinations.assassinId ";
 	$sql .= " WHERE participations.state = 'ACTIVE' AND assassinations.state = 'PENDING' AND participations.gameId = '$gameId';";
-	$result = mysql_query($sql) or sql_error_report($sql);
+	$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 	if(mysql_num_rows($result) != 2) {
 		showError('IMPOSIBLE6');
 	}
@@ -137,9 +137,21 @@ function handleGameStart($gameId) {
 	$sql .= "INNER JOIN participations AS assassinPart ON assassinations.gameId = assassinPart.gameId AND assassinations.assassinId = assassinPart.playerId ";
 	$sql .= "INNER JOIN participations AS victimPart ON assassinations.gameId = victimPart.gameId AND assassinations.victimId = victimPart.playerId ";
 	$sql .= "WHERE assassinations.gameId='$gameId' AND assassinations.state = 'PENDING' AND victimPart.state = 'ACTIVE';";
-	$result = mysql_query($sql) or sql_error_report($sql);
+	$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 	while($row = mysql_fetch_assoc($result)) {
 		sendGameStarted($row['email'], $gameName, $row['codeword'], $row['alias'], $row['name']);
+	}
+}
+
+function handleGamePending($gameId) {
+	$gameName = getGameName($gameId);
+
+	$sql  = "SELECT players.email, participations.codeword, participations.alias ";
+	$sql .= "FROM players INNER JOIN participations ON players.playerId = participations.playerId ";
+	$sql .= "WHERE participations.gameId='$gameId';";
+	$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
+	while($row = mysql_fetch_assoc($result)) {
+		sendGamePending($row['email'], $gameName, $row['alias']);
 	}
 }
 
@@ -149,7 +161,7 @@ function handleGameStart($gameId) {
 
 function getGameName($gameId) {
 	$sql = "SELECT name FROM games WHERE gameId = '$gameId' LIMIT 1;";
-	$result = mysql_query($sql) or sql_error_report($sql);
+	$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 	if($row = mysql_fetch_assoc($result)) {
 		return $row['name'];
 	} else {
@@ -160,7 +172,7 @@ function getGameName($gameId) {
 
 function getPlayerName($playerId) {
 	$sql = "SELECT email FROM players WHERE playerId = '$playerId' LIMIT 1;";
-	$result = mysql_query($sql) or sql_error_report($sql);
+	$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 	if($row = mysql_fetch_assoc($result)) {
 		return $row['email'];
 	} else {
@@ -189,19 +201,5 @@ function postToFacebook($post) {
 	$page_id = '325648886259'; 
 	return $facebook->api_client->stream_publish( $post,null,null,null,$page_id );
 	
-}
-
-function sql_error_report($sql) {		
-	$date = getDateNow();
-	$sqlError = mysql_error();
-	mysql_query(sprintf("INSERT INTO errors (type, error, extra, date) VALUES ('SQL', '%s', 'gameserver:%s', '%s');", addslashes($sqlError), addslashes($sql), $date));
-	
-	$ret = array(
-		"status" => "SQL_ERROR",
-		"error" => $sqlError,
-		"sql" => $sql
-	);
-	
-	die(json_encode($ret));
 }
 ?>

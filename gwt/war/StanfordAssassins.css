@@ -141,6 +141,14 @@ h2 {
 	text-decoration: none;
 	font-size: 18px;
 }
+
+.joinList {
+	
+}
+
+.joinList li {
+	list-style-position: inside;
+}
 		
 /* DEBUG */
 

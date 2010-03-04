@@ -10,25 +10,81 @@
 		.joinButton {
 			height: 32px;
 			font-size:	medium;
+			width: 100px;
 		}
 		.signupPanel {
-			text-align: center;
+			text-align: left;
 			margin-top: 20px;
+			width: 500px;
+			margin-left: auto;
+			margin-right: auto;
 		}
 		.waitingPanel {
 			text-align: center;
 			margin-top: 20px;
 		}
+		.joinHeader {
+			text-align: center;
+		}
+		.centered {
+			text-align: center;
+		}
+		.tokenTable {
+			margin-right: auto;
+			margin-left: auto;
+			border-collapse: collapse;
+		}
+		.tokenTableRight {
+			text-align: left;
+		}
+		.tokenTableLeft {
+			text-align: right;
+		}
+		.joinList {
+			
+		}
+		.joinList li {
+			list-style-position: inside;
+		}
 	</ui:style>
 	<g:FlowPanel>
 	<g:HTMLPanel ui:field="signupPanel" addStyleNames="{style.signupPanel}">
-		<h2>Join a game</h2>
-		<p>
-		To join a game enter the alias with which you want to be identified during the game:
+		<h2 class="{style.joinHeader}">Join a game</h2>
+		<p class="{style.centered}">
+		Ok, here's how it works:
 		</p>
-		<g:TextBox ui:field="aliasBox" addStyleNames="{style.aliasBox}"/> <g:Button ui:field="goButton" text="Join" addStyleNames="{style.joinButton}"/>
 		<p>
-		Your alias is unique for each game, and it will be displayed in the news feed every time you assassinate a victim.
+		1. &nbsp; You choose an <strong>alias</strong> for the game. Your alias is unique
+		for each game, and it will show up in the news feed every time you assassinate a victim. Don't
+		just choose your name!
+		</p>
+		<g:FlowPanel addStyleNames="{style.centered}">
+		<g:TextBox ui:field="aliasBox" addStyleNames="{style.aliasBox}"/> 
+		</g:FlowPanel>
+		<p>
+		2. &nbsp; You optionally choose your dorm and your department. With this information we can provide you with targets you're 
+		more likely to find.
+		</p>
+		<g:HTMLPanel addStyleNames="{style.centered}">
+		<table class="{style.tokenTable}">
+		<tr>
+		<td class="{style.tokenTableLeft}"><g:InlineLabel>Dorm: </g:InlineLabel></td> 
+		<td class="{style.tokenTableRight}"><g:ListBox ui:field="dormList"/></td>
+		</tr>
+		<tr>
+		<td class="{style.tokenTableLeft}"><g:InlineLabel>Department: </g:InlineLabel></td>
+		<td class="{style.tokenTableRight}"><g:ListBox ui:field="departmentList"/></td>
+		</tr>
+		</table>
+		</g:HTMLPanel> 
+		<p>
+		3. &nbsp; You press join, and you'll go into the waiting list for the first available game. We'll inform you by email once the game starts.
+		</p>
+		<g:FlowPanel addStyleNames="{style.centered}">
+		<g:Button ui:field="goButton" text="Join" addStyleNames="{style.joinButton}"/>
+		</g:FlowPanel>
+		<p>
+		
 		</p>
 	</g:HTMLPanel>
 	<g:HTMLPanel ui:field="waitingPanel" addStyleNames="{style.waitingPanel}">

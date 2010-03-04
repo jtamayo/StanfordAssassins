@@ -1,40 +1,137 @@
-CREATE TABLE  `oguievet_assdev`.`disputes` (
-`disputeId` INT NOT NULL AUTO_INCREMENT ,
-`gameId` INT NOT NULL ,
-`accuserId` INT NOT NULL ,
-`defendantId` INT NOT NULL ,
-`status` ENUM(  'CREATED',  'REBUTED',  'RESOLVED_ASS',  'RESOLVED_DEF' ) NOT NULL DEFAULT  'CREATED',
-`accusation` VARCHAR( 10000 ) NOT NULL ,
-`defense` VARCHAR( 10000 ) NOT NULL ,
-`createdTime` DATETIME NOT NULL DEFAULT  '0000-00-00 00:00:00',
-`rebutedTime` DATETIME NOT NULL DEFAULT  '0000-00-00 00:00:00',
-`resolvedTime` DATETIME NOT NULL DEFAULT  '0000-00-00 00:00:00',
-PRIMARY KEY (  `disputeId` )
-) ENGINE = MYISAM CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+CREATE TABLE  `oguievet_assdev`.`tokens` (
+`id` VARCHAR( 20 ) NOT NULL ,
+`name` VARCHAR( 100 ) NOT NULL ,
+`type` ENUM(  'DORM',  'DEPARTMENT' ) NOT NULL DEFAULT  'DORM',
+PRIMARY KEY (  `id` ) ,
+UNIQUE (
+`name`
+)
+) ENGINE = MYISAM ;
 
+ALTER TABLE  `players` ADD  `tokens` VARCHAR( 200 ) NOT NULL ;
 
-ALTER TABLE  `disputes` ADD UNIQUE (
-`gameId` ,
-`accuserId` ,
-`defendantId`
-);
+INSERT INTO  `oguievet_assdev`.`tokens` (
+`id` ,
+`name` ,
+`type`
+)
+VALUES 
+('evbuildings',"EV buildings 1-144",'DORM'),
+('abrams',"Abrams",'DORM'),
+('barnes',"Barnes",'DORM'),
+('blackwelder',"Blackwelder",'DORM'),
+('hoskins',"Hoskins",'DORM'),
+('hulme',"Hulme",'DORM'),
+('mcfarland',"McFarland",'DORM'),
+('quillen',"Quillen",'DORM'),
+('evstudio1',"EV Studio 1",'DORM'),
+('evstudio2',"EV Studio 2",'DORM'),
+('evstudio3',"EV Studio 3",'DORM'),
+('evstudio4',"EV Studio 4",'DORM'),
+('evstudio5',"EV Studio 5",'DORM'),
+('evstudio6',"EV Studio 6",'DORM'),
+('rains',"Rains",'DORM'),
+('lyman',"Lyman",'DORM'),
+('munger',"Munger",'DORM'),
+('schwab',"Schwab",'DORM'),
+('brannerhall',"Branner Hall",'DORM'),
+('crothershall',"Crothers Hall",'DORM'),
+('florencemoorehall',"Florence Moore Hall",'DORM'),
+('governorscorner',"Governor's Corner",'DORM'),
+('lagunitacourt',"Lagunita Court",'DORM'),
+('manzanitapark',"Manzanita Park",'DORM'),
+('roblehall',"Roble Hall",'DORM'),
+('sternhall',"Stern Hall",'DORM'),
+('toyonhall',"Toyon Hall",'DORM'),
+('wilburhall',"Wilbur Hall",'DORM'),
+('mirrieleeshouse',"Mirrielees House",'DORM'),
+('oakcreekapartments',"Oak Creek Apartments",'DORM'),
+('chithetachi',"Chi Theta Chi",'DORM'),
+('columbae',"Columbae",'DORM'),
+('ebf',"Enchanted Broccoli Forest",'DORM'),
+('hammarskjold',"Hammarskjold",'DORM'),
+('kairos',"Kairos",'DORM'),
+('synergy',"Synergy",'DORM'),
+('terra',"Terra",'DORM'),
+('kappaalpha',"Kappa Alpha",'DORM'),
+('kappasigma',"Kappa Sigma",'DORM'),
+('phikappapsi',"Phi Kappa Psi",'DORM'),
+('sigmaalphaepsilon',"Sigma Alpha Epsilon",'DORM'),
+('sigmanu',"Sigma Nu",'DORM'),
+('sigmachi',"Sigma Chi",'DORM'),
+('thetadeltachi',"Theta Delta Chi",'DORM'),
+('deltadeltadelta',"Delta Delta Delta",'DORM'),
+('kappaalphatheta',"Kappa Alpha Theta",'DORM'),
+('pibetaphi',"Pi Beta Phi",'DORM'),
+('aeronautics',"Aeronautics & Astronautics",'DEPARTMENT'),
+('anesthesia',"Anesthesia",'DEPARTMENT'),
+('anthropology',"Anthropology",'DEPARTMENT'),
+('appliedphysics',"Applied Physics",'DEPARTMENT'),
+('art',"Art & Art History",'DEPARTMENT'),
+('asianlanguages',"Asian Languages",'DEPARTMENT'),
+('biochemistry',"Biochemistry",'DEPARTMENT'),
+('bioengineering',"Bioengineering",'DEPARTMENT'),
+('biology',"Biology",'DEPARTMENT'),
+('business',"Business, Graduate School of",'DEPARTMENT'),
+('cardiothoracicsurgery',"Cardiothoracic Surgery",'DEPARTMENT'),
+('chemicalandsystemsbiology',"Chemical and Systems Biology",'DEPARTMENT'),
+('chemicalengineering',"Chemical Engineering",'DEPARTMENT'),
+('chemistry',"Chemistry",'DEPARTMENT'),
+('civil',"Civil & Environmental Engineering",'DEPARTMENT'),
+('classics',"Classics",'DEPARTMENT'),
+('communication',"Communication",'DEPARTMENT'),
+('comparativeliterature',"Comparative Literature",'DEPARTMENT'),
+('comparativemedicine',"Comparative Medicine",'DEPARTMENT'),
+('computerscience',"Computer Science",'DEPARTMENT'),
+('dermatology',"Dermatology",'DEPARTMENT'),
+('developmentalbiology',"Developmental Biology",'DEPARTMENT'),
+('drama',"Drama",'DEPARTMENT'),
+('economics',"Economics",'DEPARTMENT'),
+('education',"Education, School of",'DEPARTMENT'),
+('electricalengineering',"Electrical Engineering",'DEPARTMENT'),
+('energyresourcesengineering',"Energy Resources Engineering",'DEPARTMENT'),
+('english',"English",'DEPARTMENT'),
+('environmentalearthsystemscience',"Environmental Earth System Science",'DEPARTMENT'),
+('genetics',"Genetics",'DEPARTMENT'),
+('geological',"Geological & Environmental Sciences",'DEPARTMENT'),
+('geophysics',"Geophysics",'DEPARTMENT'),
+('germanstudies',"German Studies",'DEPARTMENT'),
+('healthresearch',"Health Research & Policy",'DEPARTMENT'),
+('history',"History",'DEPARTMENT'),
+('iberian',"Iberian & Latin American Cultures",'DEPARTMENT'),
+('lawschool',"Law School",'DEPARTMENT'),
+('linguistics',"Linguistics",'DEPARTMENT'),
+('managementscience',"Management Science & Engineering",'DEPARTMENT'),
+('materialsscience',"Materials Science & Engineering",'DEPARTMENT'),
+('mathematics',"Mathematics",'DEPARTMENT'),
+('mechanicalengineering',"Mechanical Engineering",'DEPARTMENT'),
+('medicine',"Medicine",'DEPARTMENT'),
+('microbiology',"Microbiology & Immunology",'DEPARTMENT'),
+('molecular',"Molecular & Cellular Physiology",'DEPARTMENT'),
+('music',"Music",'DEPARTMENT'),
+('neurology',"Neurology & Neurological Sciences",'DEPARTMENT'),
+('neurosurgery',"Neurosurgery",'DEPARTMENT'),
+('obstetricsandgynecology',"Obstetrics and Gynecology",'DEPARTMENT'),
+('ophthalmology',"Ophthalmology",'DEPARTMENT'),
+('orthopaedicsurgery',"Orthopaedic Surgery",'DEPARTMENT'),
+('otolaryngology',"Otolaryngology",'DEPARTMENT'),
+('slac',"SLAC",'DEPARTMENT'),
+('pathology',"Pathology",'DEPARTMENT'),
+('pediatrics',"Pediatrics",'DEPARTMENT'),
+('philosophy',"Philosophy",'DEPARTMENT'),
+('physics',"Physics",'DEPARTMENT'),
+('politicalscience',"Political Science",'DEPARTMENT'),
+('psychiatryandbehavioralsciences',"Psychiatry and Behavioral Sciences",'DEPARTMENT'),
+('psychology',"Psychology",'DEPARTMENT'),
+('radiationoncology',"Radiation Oncology",'DEPARTMENT'),
+('radiology',"Radiology",'DEPARTMENT'),
+('religiousstudies',"Religious Studies",'DEPARTMENT'),
+('slaviclanguagesandliterature',"Slavic Languages and Literature",'DEPARTMENT'),
+('sociology',"Sociology",'DEPARTMENT'),
+('statistics',"Statistics",'DEPARTMENT'),
+('structuralbiology',"Structural Biology",'DEPARTMENT'),
+('surgery',"Surgery",'DEPARTMENT'),
+('urology',"Urology",'DEPARTMENT')
+;
 
-ALTER TABLE  `participations` ADD  `disputes` INT NOT NULL DEFAULT  '0';
-
-ALTER TABLE  `disputes` ADD  `won` ENUM(  'ACC',  'DEF' ) NOT NULL DEFAULT  'DEF' AFTER  `defendantId`;
-
-ALTER TABLE  `disputes` CHANGE  `status`  `status` ENUM(  'CREATED',  'REBUTED',  'RESOLVED_ACC',  'RESOLVED_DEF' ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT  'CREATED';
-
-
-
-ALTER TABLE  `assassinations` ADD  `detailsState` ENUM(  'NONE',  'ADDED',  'TIMEOUT' ) NOT NULL DEFAULT  'NONE' ;
-
-UPDATE `assassinations` SET details='', detailsState='TIMEOUT' WHERE details='#' AND detailsState='NONE' ;
-UPDATE `assassinations` SET detailsState='ADDED' WHERE detailsState='NONE' ;
-UPDATE `assassinations` SET detailsState='NONE' WHERE state != 'SUCCESS' ;
-ALTER TABLE  `assassinations` CHANGE  `details`  `details` VARCHAR( 2000 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT  '' ;
-
-
-
-ALTER TABLE  `assassinations` CHANGE  `state`  `state` ENUM(  'PENDING',  'SUCCESS',  'SELF_DEFENSE',  'FAIL',  'KICKED',  'WANTED' ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT  'PENDING' ;
-ALTER TABLE  `games` ADD  `timeoutHours` INT NOT NULL DEFAULT  '144', ADD  `wantedHours` INT NOT NULL DEFAULT  '72' ;
+ALTER TABLE  `games` ADD  `token` VARCHAR( 50 ) NOT NULL ;

@@ -14,7 +14,7 @@
 	$sql  = " SELECT games.gameId, games.name, ";
 	$sql .= " (SELECT COUNT(*) FROM participations WHERE participations.gameId = games.gameId AND participations.state = 'ACTIVE') AS numPlayers ";
 	$sql .= " FROM games WHERE games.state='ACTIVE';";
-	$gameResult = mysql_query($sql) or sql_error_report($sql);
+	$gameResult = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 	while($row = mysql_fetch_assoc($gameResult)) {
 		$gameId = $row['gameId'];
 		$gameName = $row['name'];
@@ -28,7 +28,7 @@
 		$sql  = " SELECT assassinations.gameId, players.playerId, players.name, assassinations.victimId, assassinations.endDate ";
 		$sql .= " FROM assassinations INNER JOIN players ON players.playerId = assassinations.assassinId "; 
 		$sql .= " WHERE assassinations.state='PENDING' AND assassinations.endDate < '$date';";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		$numTimedOut = mysql_num_rows($result);
 		while($row = mysql_fetch_assoc($result)) {
 			$playerName = $row['name'];
@@ -49,19 +49,19 @@
 			$timedOutListStr =  implode(',', $timedOutList);
 			
 			$sql = "UPDATE players SET state = 'NOTHING' WHERE playerId IN ($timedOutListStr);";
-			mysql_query($sql) or sql_error_report($sql);
+			mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 			if($numTimedOut != mysql_affected_rows()) {
 				showError('IMPOSIBLE1');
 			}
 			
 			$sql = "UPDATE participations SET state = 'KICKED' WHERE gameId = '$gameId' AND playerId IN ($timedOutListStr);";
-			mysql_query($sql) or sql_error_report($sql);
+			mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 			if($numTimedOut != mysql_affected_rows()) {
 				showError('IMPOSIBLE2');
 			}
 			
 			$sql = "UPDATE assassinations SET state = 'KICKED' WHERE state='PENDING' AND gameId = '$gameId' AND assassinId IN ($timedOutListStr);";
-			mysql_query($sql) or sql_error_report($sql);
+			mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 			if($numTimedOut != mysql_affected_rows()) {
 				showError('IMPOSIBLE3');
 			}
@@ -71,7 +71,7 @@
 			if($numPlayersLeft == 0) {
 				// If game 0 players, finish it
 				$sql = "UPDATE games SET state = 'FINISHED', winnerId='0', endDate='$date' WHERE gameId = '$gameId' LIMIT 1;";
-				mysql_query($sql) or sql_error_report($sql);
+				mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 				
 				handleGameOver($gameId);
 			} else if($numPlayersLeft == 1) {
@@ -81,7 +81,7 @@
 				$sql .= " FROM players INNER JOIN participations ON players.playerId = participations.playerId ";
 				$sql .= " INNER JOIN assassinations ON players.playerId = assassinations.assassinId ";
 				$sql .= " WHERE participations.state = 'ACTIVE' AND assassinations.state = 'PENDING' AND participations.gameId = '$gameId';";
-				$result = mysql_query($sql) or sql_error_report($sql);
+				$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 				if(mysql_num_rows($result) != 1) {
 					showError('IMPOSIBLE4');
 				}
@@ -97,13 +97,13 @@
 				
 				// update the winner
 				$sql = "UPDATE assassinations SET state = 'FAIL' WHERE assassinationId='$winnerAssId' LIMIT 1;";
-				mysql_query($sql) or sql_error_report($sql);
+				mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 				
 				$sql = "UPDATE participations SET state = 'WON' WHERE gameId = '$gameId' AND playerId = '$winnerId' LIMIT 1;";
-				mysql_query($sql) or sql_error_report($sql);
+				mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 				
 				$sql = "UPDATE games SET state = 'FINISHED', winnerId='$winnerId', endDate='$date' WHERE gameId = '$gameId' LIMIT 1;";
-				mysql_query($sql) or sql_error_report($sql);
+				mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 				
 				handleGameOver($gameId);
 			} else if($numPlayersLeft == 2) {
@@ -112,7 +112,7 @@
 				$sql .= " FROM players INNER JOIN participations ON players.playerId = participations.playerId ";
 				$sql .= " INNER JOIN assassinations ON players.playerId = assassinations.assassinId ";
 				$sql .= " WHERE participations.state = 'ACTIVE' AND assassinations.state = 'PENDING' AND participations.gameId = '$gameId';";
-				$result = mysql_query($sql) or sql_error_report($sql);
+				$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 				if(mysql_num_rows($result) != 2) {
 					showError('IMPOSIBLE6');
 				}
@@ -140,24 +140,24 @@
 				// re arrange the targets
 				if($p1VicId == $p2Id) {
 					$sql = "UPDATE assassinations SET endDate = '$futureDate' WHERE assassinationId = '$p1AssId' LIMIT 1;";
-					mysql_query($sql) or sql_error_report($sql);
+					mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 				} else {
 					$sql = "UPDATE assassinations SET state = 'FAIL' WHERE assassinationId = '$p1AssId' LIMIT 1;";
-					mysql_query($sql) or sql_error_report($sql);
+					mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 					
 					$sql = "INSERT INTO assassinations (gameId, assassinId, victimId, state, startDate, endDate) VALUES ('$gameId', '$p1Id', '$p2Id', 'PENDING', '$date', '$futureDate');";
-					mysql_query($sql) or sql_error_report($sql);
+					mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 				}
 				
 				if($p2VicId == $p1Id) {
 					$sql = "UPDATE assassinations SET endDate = '$futureDate' WHERE assassinationId = '$p2AssId' LIMIT 1;";
-					mysql_query($sql) or sql_error_report($sql);
+					mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 				} else {
 					$sql = "UPDATE assassinations SET state = 'FAIL' WHERE assassinationId = '$p2AssId' LIMIT 1;";
-					mysql_query($sql) or sql_error_report($sql);
+					mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 					
 					$sql = "INSERT INTO assassinations (gameId, assassinId, victimId, state, startDate, endDate) VALUES ('$gameId', '$p2Id', '$p1Id', 'PENDING', '$date', '$futureDate');";
-					mysql_query($sql) or sql_error_report($sql);
+					mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 				}
 				
 				// handle
@@ -169,7 +169,7 @@
 				$sql .= " FROM players INNER JOIN participations ON players.playerId = participations.playerId ";
 				$sql .= " INNER JOIN assassinations ON players.playerId = assassinations.assassinId ";
 				$sql .= " WHERE participations.state = 'ACTIVE' AND assassinations.state = 'PENDING' AND participations.gameId = '$gameId';";
-				$playerResult = mysql_query($sql) or sql_error_report($sql);
+				$playerResult = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 				while($row = mysql_fetch_assoc($playerResult)) {
 					$pId = $row['playerId'];
 					$pAssId = $row['assassinationId'];
@@ -183,10 +183,10 @@
 					
 					if($numSkiped > 0) {
 						$sql = "UPDATE assassinations SET state = 'FAIL' WHERE assassinationId = '$pAssId' LIMIT 1;";
-						mysql_query($sql) or sql_error_report($sql);
+						mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 					
 						$sql = "INSERT INTO assassinations (gameId, assassinId, victimId, state, startDate, endDate) VALUES ('$gameId', '$pId', '$victimId', 'PENDING', '$date', '$futureDate');";
-						mysql_query($sql) or sql_error_report($sql);
+						mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 						
 						handleTargetChanged($pId, $gameId);
 					}
@@ -197,13 +197,13 @@
 	
 	trace("Details timeout manager...");
 	$sql = "SELECT assassinationId FROM assassinations WHERE state = 'SUCCESS' AND detailsState='NONE' AND endDate < DATE_SUB('$date', INTERVAL 2 MINUTE);";
-	$result = mysql_query($sql) or sql_error_report($sql);
+	$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 	while($row = mysql_fetch_assoc($result)) {
 		require_once('handler.php');
 		
 		$assassinationId = $row['assassinationId'];
 		$sql = "UPDATE assassinations SET detailsState='TIMEOUT' WHERE assassinationId='$assassinationId' LIMIT 1;";
-		mysql_query($sql) or sql_error_report($sql);
+		mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		
 		handleDetailsTimeout($assassinationId);
 	}
@@ -224,14 +224,5 @@
 			fwrite($stderr, "ERROR: $str\n");
 			fclose($stderr);
 		}
-	}
-	
-	function sql_error_report($sql) {
-		require_once('db_login.php');
-		
-		$date = getDateNow();
-		$sqlError = mysql_error();
-		mysql_query(sprintf("INSERT INTO errors (type, error, extra, date) VALUES ('SQL', '%s', 'make_game_deamon:%s', '%s');", addslashes($sqlError), addslashes($sql), $date));
-		die($sqlError . "\n" . $sql);
 	}
 ?>

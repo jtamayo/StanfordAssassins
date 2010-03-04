@@ -49,7 +49,7 @@ public class MyStats extends Composite {
 		gamesPlayed.setText(""+stats.getGamesPlayed());
 		assassinations.setText(""+stats.getAssassinations());
 		gamesWon.setText(""+stats.getGamesWon());
-		//likes.setText(""+stats.getTotalLikes());
-		//killingSpree.setText(""+stats.getKillingSpree());
+		totalLikes.setText(""+stats.getLikes());
+		killingSpree.setText(""+stats.getKillingSpree());
 	}
 }

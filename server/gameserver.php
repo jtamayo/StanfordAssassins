@@ -2,6 +2,8 @@
 	//header('Content-Type: text/plain; charset=utf-8');
 	header('Content-Type: application/json; charset=utf-8');
 	
+	require_once('common.php');
+	
 	$invalidArg = false; // assume that we are valid
 	
 	session_start();
@@ -18,7 +20,6 @@
 		}
 	}
 	
-	require_once('common.php');
 	require_once('db_login.php');
 	
 	switch(arg('cmd')) {
@@ -38,7 +39,11 @@
 			if($alias === false) $invalidArg = 'alias';
 		}
 		if($invalidArg === false) {
-			joinGame($playerId, $alias);
+			$tokens = arg('tokens');
+			if($tokens === false) $invalidArg = 'tokens';
+		}
+		if($invalidArg === false) {
+			joinGame($playerId, $alias, $tokens);
 		}
 		break;
 		
@@ -100,7 +105,7 @@
 		
 	case 'getLeaderboard':
 		if($invalidArg === false) {
-			getPlayerStats(false);
+			getLeaderBoard();
 		}
 		break;
 
@@ -142,50 +147,43 @@
 		
 		print json_encode($ret);
 	}
-	
-	function arg($arg) {
-		if(isset($_POST[$arg])) return ini_get('magic_quotes_gpc') ? $_POST[$arg] : addslashes($_POST[$arg]);
-		if(isset($_GET[$arg])) return ini_get('magic_quotes_gpc') ? $_GET[$arg] : addslashes($_GET[$arg]);
-		return false;
-	}
-	
-	function sql_error_report($sql) {		
-		$date = getDateNow();
-		$sqlError = mysql_error();
-		mysql_query(sprintf("INSERT INTO errors (type, error, extra, date) VALUES ('SQL', '%s', 'gameserver:%s', '%s');", addslashes($sqlError), addslashes($sql), $date));
-		
-		$ret = array(
-			"status" => "SQL_ERROR",
-			"error" => $sqlError,
-			"sql" => $sql
-		);
-		
-		die(json_encode($ret));
-	}
 
-	function getPlayerStats($playerId = false) {
+	function getPlayerStats($playerId) {
 		$playerStats = array();
 		
+		$sql2 ="SELECT gameAssassinations.playerId, gameAssassinations.name, MAX(killsPerGame) as killingSpree FROM
+(SELECT players.playerId, players.name, gamesInquery.gameId, COUNT(gamesInquery.gameId) as killsPerGame
+FROM players LEFT JOIN (SELECT * FROM assassinations WHERE assassinations.state = 'SUCCESS') as assassinInquery on assassinInquery.assassinId = players.playerId 
+LEFT JOIN (SELECT * FROM games WHERE games.state = 'FINISHED') as gamesInquery ON assassinInquery.gameId = gamesInquery.gameId 
+GROUP BY players.playerId, players.name, gamesInquery.gameId) as gameAssassinations WHERE gameAssassinations.playerId =  '$playerId' 
+GROUP BY gameAssassinations.playerId, gameAssassinations.name" ;
+
 		$sql  = "SELECT players.playerId, players.name, ";
 		$sql .= "(SELECT COUNT(*) FROM assassinations INNER JOIN games ON assassinations.gameId = games.gameId WHERE assassinations.assassinId = players.playerId AND assassinations.state = 'SUCCESS' AND games.state = 'FINISHED') AS assassinationsCompleted, ";
 		$sql .= "(SELECT COUNT(*) FROM assassinations WHERE assassinations.victimId = players.playerId AND assassinations.state = 'SUCCESS') AS assassinated, ";
 		$sql .= "(SELECT COUNT(*) FROM participations WHERE participations.playerId = players.playerId AND state != 'ACTIVE') AS gamesPlayed, ";
-		$sql .= "(SELECT COUNT(*) FROM participations WHERE participations.playerId = players.playerId AND state = 'WON') AS gamesWon ";
-		$sql .= "FROM players " . ($playerId!==false?"WHERE players.playerId = '$playerId' ":'') . "LIMIT 1000;";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$sql .= "(SELECT COUNT(*) FROM participations WHERE participations.playerId = players.playerId AND state = 'WON') AS gamesWon, ";
+		$sql .= "(SELECT COUNT(likeId) FROM assassinations INNER JOIN likes ON assassinations.assassinationId = likes.assassinationId INNER JOIN games ON assassinations.gameId = games.gameId  WHERE assassinations.assassinId = 16 AND games.state = 'FINISHED' ) as  assassinationsLiked ";
+		$sql .= "FROM players " . "WHERE players.playerId = '$playerId' " . "LIMIT 1000;";
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
+
 		while($row = mysql_fetch_assoc($result)) {
-			$playerStat = array(
-				"playerId" => $row['playerId'],
-    			"name" => $row['name'],
-   				"assassinations" => $row['assassinationsCompleted'],
-   				"assassinated" => $row['assassinated'],
-    			"gamesPlayed" => $row['gamesPlayed'],
-    			"gamesWon" => $row['gamesWon']
-			);
+		
+			$result2 = mysql_query($sql2) or sql_error_report($sql2, $_SERVER["SCRIPT_NAME"]);
 			
-			if($playerId===false) {
-				array_push($playerStats, $playerStat);
-			} else {
+			while($row2 = mysql_fetch_assoc($result2)) {
+			
+				$playerStat = array(
+					"playerId" => $row['playerId'],
+					"name" => $row['name'],
+					"assassinations" => $row['assassinationsCompleted'],
+					"assassinated" => $row['assassinated'],
+					"gamesPlayed" => $row['gamesPlayed'],
+					"gamesWon" => $row['gamesWon'],
+					"killingSpree" => $row2['killingSpree'],
+					"likes" => '0' //$row2['assassinationsLiked']
+				);
+			
 				$ret = array(
 					"status" => "OK",
 					"playerStats" => $playerStat
@@ -195,16 +193,41 @@
 			}
 		}
 		
-		if($playerId===false) {
+		$ret = array(
+			"status" => "NO_PLAYER"
+		);
+		print json_encode($ret);
+	}
+
+	function getLeaderBoard() {
+		$playerStats = array();
+		
+		$sql  = "SELECT players.playerId, players.name, ";
+		$sql .= "(SELECT COUNT(*) FROM assassinations INNER JOIN games ON assassinations.gameId = games.gameId WHERE assassinations.assassinId = players.playerId AND assassinations.state = 'SUCCESS' AND games.state = 'FINISHED') AS assassinationsCompleted, ";
+		$sql .= "(SELECT COUNT(*) FROM assassinations WHERE assassinations.victimId = players.playerId AND assassinations.state = 'SUCCESS') AS assassinated, ";
+		$sql .= "(SELECT COUNT(*) FROM participations WHERE participations.playerId = players.playerId AND state != 'ACTIVE') AS gamesPlayed, ";
+		$sql .= "(SELECT COUNT(*) FROM participations WHERE participations.playerId = players.playerId AND state = 'WON') AS gamesWon ";
+		$sql .= "FROM players " . "LIMIT 1000;";
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
+
+		while($row = mysql_fetch_assoc($result)) {
+		
+			$playerStat = array(
+				"playerId" => $row['playerId'],
+    			"name" => $row['name'],
+   				"assassinations" => $row['assassinationsCompleted'],
+   				"assassinated" => $row['assassinated'],
+    			"gamesPlayed" => $row['gamesPlayed'],
+    			"gamesWon" => $row['gamesWon']
+			);
+			
+			array_push($playerStats, $playerStat);
+		}
+		
 			$ret = array(
 				"status" => "OK",
 				"playerStats" => $playerStats
 			);
-		} else {
-			$ret = array(
-				"status" => "NO_PLAYER"
-			);
-		}
 		print json_encode($ret);
 	}
 	
@@ -213,7 +236,7 @@
 		
 		$date = getDateNow();
 		$sql = "INSERT INTO errors (type, error, extra, date) VALUES ('USER', '$error', '$playerId', '$date');";
-		mysql_query($sql) or sql_error_report($sql);
+		mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		
 		$ret = array( "status" => "OK" );
 		print json_encode($ret);
@@ -229,7 +252,7 @@
 		$sql .= "FROM participations INNER JOIN assassinations ON participations.playerId = assassinations.victimId AND participations.gameId = assassinations.gameId ";
 		$sql .= "INNER JOIN players AS victim ON victim.playerId = participations.playerId ";
 		$sql .= "WHERE participations.codeword = '$codeword' AND assassinations.assassinId = '$playerId' AND assassinations.gameId = '$gameId' AND assassinations.state = 'PENDING' LIMIT 1;";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		if($row = mysql_fetch_assoc($result)) {
 			killPlayer($row["victimId"], $gameId, true, true);
 				
@@ -260,18 +283,18 @@
 		$sql .= "FROM participations INNER JOIN assassinations ON participations.playerId = assassinations.assassinId AND participations.gameId = assassinations.gameId ";
 		$sql .= "INNER JOIN players AS victim ON victim.playerId = participations.playerId ";
 		$sql .= "WHERE participations.codeword = '$codeword' AND assassinations.victimId = '$playerId' AND assassinations.gameId = '$gameId' AND assassinations.state = 'PENDING' LIMIT 1;";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		if($row = mysql_fetch_assoc($result)) {
 			$assassinId = $row["assassinId"];
 			killPlayer($row["assassinId"], $gameId, false, false);
 			
 			// also insert the assassination by this player
 			$sql = "INSERT INTO assassinations (gameId, assassinId, victimId, state, startDate, endDate) VALUES ('$gameId', '$playerId', '$assassinId', 'SELF_DEFENSE', '$date', '$date');";
-			mysql_query($sql) or sql_error_report($sql);
+			mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 			
 			// Find the assassinationId for the datails
 			$sql = "SELECT assassinationId FROM assassinations WHERE gameId='$gameId' AND assassinId='$playerId' AND victimId='$assassinId' LIMIT 1;";
-			$result2 = mysql_query($sql) or sql_error_report($sql);
+			$result2 = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 			$row2 = mysql_fetch_assoc($result2);
 			
 			$game = getGameObject($playerId, $gameId);
@@ -298,7 +321,7 @@
 		
 		// get wanted hours
 		$sql  = "SELECT wantedHours FROM games WHERE gameId = '$gameId' LIMIT 1;";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		if($row = mysql_fetch_assoc($result)) {
 			$wantedHours = intval($row['wantedHours']);
 		} else {
@@ -311,22 +334,22 @@
 		$sql .= "FROM assassinations INNER JOIN participations AS wantedPart ON wantedPart.gameId = assassinations.gameId AND wantedPart.playerId = assassinations.assassinId ";
 		$sql .= "INNER JOIN players AS victim ON victim.playerId = wantedPart.playerId ";
 		$sql .= "WHERE wantedPart.codeword='$codeword' AND assassinations.assassinId != '$playerId' AND wantedPart.gameId = '$gameId' AND assassinations.state = 'PENDING' AND assassinations.endDate < DATE_ADD('$date', INTERVAL $wantedHours HOUR) LIMIT 1;";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		if($row = mysql_fetch_assoc($result)) {
 			$wantedId = $row["assassinId"];
 			killPlayer($wantedId, $gameId, false, false);
 			
 			// also insert the assassination by this player
 			$sql = "INSERT INTO assassinations (gameId, assassinId, victimId, state, startDate, endDate) VALUES ('$gameId', '$playerId', '$wantedId', 'WANTED', '$date', '$date');";
-			mysql_query($sql) or sql_error_report($sql);
+			mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 			
 			// Add 24 hours to players's actual assassination time
 			$sql = "UPDATE assassinations SET endDate = DATE_ADD(endDate, INTERVAL 24 HOUR) WHERE gameId='$gameId' AND assassinId='$playerId' AND state='PENDING' LIMIT 1;";
-			mysql_query($sql) or sql_error_report($sql);
+			mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 			
 			// Find teh assassinationId for the datails
 			$sql = "SELECT assassinationId FROM assassinations WHERE gameId='$gameId' AND assassinId='$playerId' AND victimId='$wantedId' LIMIT 1;";
-			$result2 = mysql_query($sql) or sql_error_report($sql);
+			$result2 = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 			$row2 = mysql_fetch_assoc($result2);
 				
 			$game = getGameObject($playerId, $gameId);
@@ -361,7 +384,7 @@
 		$dateLimit = getDateLimit();
 		
 		$sql = "SELECT assassinationId, assassinId FROM assassinations WHERE gameId = '$gameId' AND victimId = '$playerId' AND state='PENDING' LIMIT 1;";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		if($row = mysql_fetch_assoc($result)) {
 			$successfulAssassinationId = $row['assassinationId'];
 			$assassinId = $row['assassinId'];
@@ -374,7 +397,7 @@
 		$sql .= "FROM assassinations INNER JOIN players ON assassinations.victimId = players.playerId ";
 		$sql .= "INNER JOIN participations ON participations.playerId = players.playerId ";
 		$sql .= "WHERE assassinations.gameId = '$gameId' AND participations.gameId = '$gameId' AND assassinations.assassinId = '$playerId' AND assassinations.state='PENDING' LIMIT 1;";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		if($row = mysql_fetch_assoc($result)) {
 			$failedAssassination = $row['assassinationId'];
 			$newVictimId = $row['newVictimId'];
@@ -387,23 +410,23 @@
 		
 		// update assassin's assassination success
 		$sql = "UPDATE assassinations SET state='" . ($assassinSuccess?'SUCCESS':'FAIL') . "', endDate='$date', detailsState='" . ($waitForDetails?'NONE':'ADDED') . "' WHERE assassinationId = '$successfulAssassinationId';";
-		mysql_query($sql) or sql_error_report($sql);
+		mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		
 		// update victim's assassination fail
 		$sql = "UPDATE assassinations SET state='FAIL', endDate='$date' WHERE assassinationId = '$failedAssassination';";
-		mysql_query($sql) or sql_error_report($sql);
+		mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		
 		// update victim's participation to ASSASSINATED
 		$sql = "UPDATE participations SET state='ASSASSINATED' WHERE gameId = '$gameId' AND playerId = '$playerId' LIMIT 1;";
-		mysql_query($sql) or sql_error_report($sql);
+		mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		
 		// update victim's player to NOTHING
 		$sql = "UPDATE players SET state='NOTHING' WHERE playerId = '$playerId' LIMIT 1;";
-		mysql_query($sql) or sql_error_report($sql);
+		mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		
 		// count the number of players still in the game
 		$sql = "SELECT * FROM participations WHERE participations.gameId = '$gameId' AND state = 'ACTIVE';";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		$playersLeft = mysql_num_rows($result);
 		
 		/// UPDATE END DATE IN ASSASSINATIONS
@@ -413,22 +436,22 @@
 			// game has been won by playerId
 			// update player's participation to WON
 			$sql = "UPDATE participations SET state='WON' WHERE gameId = '$gameId' AND playerId = '$assassinId' LIMIT 1;";
-			mysql_query($sql) or sql_error_report($sql);
+			mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 			
 			// update player to NOTHING
 			$sql = "UPDATE players SET state='NOTHING' WHERE playerId = '$assassinId' LIMIT 1;";
-			mysql_query($sql) or sql_error_report($sql);
+			mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 			
 			// update game to finished
 			$sql = "UPDATE games SET state='FINISHED', endDate='$date', winnerId='$assassinId' WHERE gameId = '$gameId' LIMIT 1;";
-			mysql_query($sql) or sql_error_report($sql);
+			mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 			
 			handlePlayerAssassinated($playerId);
 			handleGameOver($gameId);
 		} else {
 			// create new assassination
 			$sql = "INSERT INTO assassinations (gameId, assassinId, victimId, state, startDate, endDate) VALUES ('$gameId', '$assassinId', '$newVictimId', 'PENDING', '$date', '$dateLimit');";
-			mysql_query($sql) or sql_error_report($sql);
+			mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 			
 			handlePlayerAssassinated($playerId);
 		}
@@ -440,7 +463,7 @@
 	
 	function reportLike($playerId, $assassinationId) {
 		$sql = "SELECT likeId FROM likes WHERE assassinationId='$assassinationId' AND playerId='$playerId' LIMIT 1;";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		if($row = mysql_fetch_assoc($result)) {
 			$ret = array(
 				"status" => "ALREADY_LIKED"
@@ -452,7 +475,7 @@
 		
 		// pull out the gameId out of the assassination
 		$sql = "SELECT gameId FROM assassinations WHERE assassinationId='$assassinationId' LIMIT 1;";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		if($row = mysql_fetch_assoc($result)) {
 			$gameId = $row['gameId'];
 		} else {
@@ -466,7 +489,7 @@
 		
 		// Add the like
 		$sql = "INSERT INTO likes (assassinationId, playerId) VALUES ('$assassinationId', '$playerId');";
-		mysql_query($sql) or sql_error_report($sql);
+		mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		
 		$ret = array(
 			"status" => "OK",
@@ -482,7 +505,7 @@
 		
 		// make sure there are more then 2 people in the game
 		$sql = "SELECT * FROM participations WHERE gameId='$gameId' AND state='ACTIVE' ;";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		if(mysql_num_rows($result) <= 2) {
 			$ret = array( "status" => "DISPUTE_DISABLED" );
 			print json_encode($ret);
@@ -495,7 +518,7 @@
 		} else {
 			$sql = "SELECT victimId AS targetId FROM assassinations WHERE state='PENDING' AND gameId='$gameId' AND assassinId='$playerId' LIMIT 1;";
 		}
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		if($row = mysql_fetch_assoc($result)) {
 			$targetId = $row['targetId'];
 		} else {
@@ -509,7 +532,7 @@
 		
 		// check that the dispute does not already exists
 		$sql = "SELECT * FROM disputes WHERE gameId='$gameId' AND accuserId='$playerId' AND defendantId='$targetId' LIMIT 1;";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		if($row = mysql_fetch_assoc($result)) {
 			$ret = array("status" => "DISPUTE_EXISTS");
 			
@@ -519,7 +542,7 @@
 		
 		// get the number of accuser, defendant disputes
 		$sql = "SELECT disputes FROM participations WHERE gameId='$gameId' AND playerId='$playerId' LIMIT 1;";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		if($row = mysql_fetch_assoc($result)) {
 			$accuserDisputes = intval($row['disputes']);
 		} else {
@@ -528,7 +551,7 @@
 		}
 		
 		$sql = "SELECT disputes FROM participations WHERE gameId='$gameId' AND playerId='$targetId' LIMIT 1;";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		if($row = mysql_fetch_assoc($result)) {
 			$targetDisputes = intval($row['disputes']);
 		} else {
@@ -537,7 +560,7 @@
 		}
 		
 		$sql = "UPDATE participations SET disputes=disputes+1 WHERE gameId='$gameId' AND (playerId='$playerId' OR playerId='$targetId') LIMIT 2;";
-		mysql_query($sql) or sql_error_report($sql);
+		mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		
 		// deciede the dispute
 		$trial = rand()/getrandmax();
@@ -555,7 +578,7 @@
 				
 				// also insert the assassination by this player
 				$sql = "INSERT INTO assassinations (gameId, assassinId, victimId, state, startDate, endDate, detailsState) VALUES ('$gameId', '$playerId', '$targetId', 'SELF_DEFENSE', '$date', '$date', 'ADDED');";
-				mysql_query($sql) or sql_error_report($sql);
+				mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 			} else {
 				killPlayer($targetId, $gameId, true, false);
 			}
@@ -564,7 +587,7 @@
 		// start the dispute
 		$sql  = " INSERT INTO disputes (gameId, accuserId, defendantId, won, status, accusation, defense, createdTime, rebutedTime, resolvedTime) ";
 		$sql .= " VALUES ('$gameId', '$playerId', '$targetId', '$won', 'CREATED', '$description', '', '$date', '0000-00-00 00:00:00', '0000-00-00 00:00:00');";
-		mysql_query($sql) or sql_error_report($sql);
+		mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		
 		require_once('handler.php');
 		handleStartDispute($playerId, $targetId, $won, $description);
@@ -583,10 +606,10 @@
 	function addDetails($playerId, $assassinationId, $details) {
 		// make sure that we are trying to add to the correct player
 		$sql = "SELECT assassinationId, DATE_ADD(endDate, INTERVAL 2 MINUTE) AS endDateOk FROM assassinations WHERE assassinationId='$assassinationId' AND assassinId='$playerId' AND state in ('SUCCESS', 'SELF_DEFENSE', 'WANTED') AND detailsState!='ADDED' LIMIT 1;";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		if($row = mysql_fetch_assoc($result)) {
 			$sql = "UPDATE assassinations SET details='$details', detailsState='ADDED' WHERE assassinationId='$assassinationId' LIMIT 1;";
-			mysql_query($sql) or sql_error_report($sql);
+			mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 			
 			$date = getDateNow();
 			if($date <= $row['endDateOk']) {
@@ -607,8 +630,8 @@
 	}
 	
 	function getPlayerObject($playerId) {
-		$sql = "SELECT playerId, email, name, state, waitingAlias, waitingStart FROM players WHERE playerId='$playerId' LIMIT 1;";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$sql = "SELECT playerId, email, name, state, waitingAlias, waitingStart, tokens FROM players WHERE playerId='$playerId' LIMIT 1;";
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		if($row = mysql_fetch_assoc($result)) {
 			$player = array(
 				"playerId" => $row['playerId'],
@@ -616,7 +639,8 @@
 				"name" => $row['name'],
 				"state" => $row['state'],
     			"waitingAlias" => $row['waitingAlias'],
-				"waitingStart" => $row['waitingStart']
+				"waitingStart" => $row['waitingStart'],
+				"tokens" => ($row['tokens']=='')?array():explode(';', $row['tokens'])
 			);
 			return $player;
 		} else {
@@ -628,12 +652,12 @@
 		$date = getDateNow();
 		$games = array();
 
-		$sql  = "SELECT games.gameId, games.name AS gameName, participations.alias, participations.codeword, games.state AS gameState, participations.state AS participationState, games.wantedHours, ";
+		$sql  = "SELECT games.gameId, games.name AS gameName, games.startDate, participations.alias, participations.codeword, games.state AS gameState, participations.state AS participationState, games.wantedHours, ";
 		$sql .= "(SELECT COUNT(*) FROM participations AS p WHERE p.gameId = games.gameId AND p.state = 'ACTIVE') AS numPlayers ";
 		$sql .= "FROM games ";
 		$sql .= "INNER JOIN participations ON participations.gameId = games.gameId ";
 		$sql .= "WHERE participations.playerId='$playerId' " . ($findGameId===false?'ORDER BY games.startDate DESC;':"AND games.gameId = '$findGameId' LIMIT 1;");
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		while($row = mysql_fetch_assoc($result)) {
 			$gameId = $row['gameId'];
 			$wantedHours = $row['wantedHours'];
@@ -642,6 +666,7 @@
 				"participationState" => $row['participationState'],
 				"gameId" => $gameId,
 				"name" => $row['gameName'],
+				"startDate" => $row['startDate'],
 				"alias" => $row['alias'],
 				"target" => '',
 				"killDeadline" => '',
@@ -650,13 +675,13 @@
 				"deathmatch" => ((intval($row['numPlayers'])==2)?'true':'false'),
 				"wantedList" => array()
 			);
-			if($row['participationState'] == 'ACTIVE') {
+			if($row['participationState'] == 'ACTIVE' && $row['gameState'] == 'ACTIVE') {
 				$sql  = "SELECT victims.name AS targetName, victims.email AS targetEmail, victimPart.alias AS targetAlias, ";
 				$sql .= "assassinations.endDate AS killDeadline, DATE_SUB(assassinations.endDate, INTERVAL $wantedHours HOUR) AS wantedDeadline ";
 				$sql .= "FROM assassinations INNER JOIN players AS victims ON assassinations.victimId = victims.playerId ";
 				$sql .= "INNER JOIN participations AS victimPart ON victimPart.gameId = assassinations.gameId AND victimPart.playerId = assassinations.victimId ";
 				$sql .= "WHERE victimPart.gameId = '$gameId' AND assassinations.state = 'PENDING' AND assassinations.assassinId='$playerId' LIMIT 1;";
-				$result2 = mysql_query($sql) or sql_error_report($sql);
+				$result2 = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 				if($row = mysql_fetch_assoc($result2)) {
 					$target = array(
 						'name' => $row["targetName"],
@@ -676,7 +701,7 @@
 				$sql .= "INNER JOIN participations AS wantedPart ON wantedPart.gameId = assassinations.gameId AND wantedPart.playerId = assassinations.assassinId ";
 				$sql .= "WHERE wantedPart.gameId = '$gameId' AND assassinations.state = 'PENDING' AND assassinations.endDate < DATE_ADD('$date', INTERVAL $wantedHours HOUR) ";
 				$sql .= "ORDER BY assassinations.endDate ASC; ";
-				$result2 = mysql_query($sql) or sql_error_report($sql);
+				$result2 = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 				while($row = mysql_fetch_assoc($result2)) {
 					$target = array(
 						'name' => $row["wantedName"],
@@ -713,7 +738,7 @@
 		$sql .= "INNER JOIN participations AS targetPart ON assassinations.gameId = targetPart.gameId AND assassinations.victimId = targetPart.playerId ";
 		$sql .= "INNER JOIN players AS targetPlayer ON assassinations.victimId = targetPlayer.playerId ";
 		$sql .= "WHERE playerPart.playerId = '$playerId' AND assassinations.state IN ('SUCCESS', 'SELF_DEFENSE', 'WANTED') AND assassinations.detailsState != 'NONE' " . ($gameId===false?'':" AND assassinations.gameId = '$gameId'") . " ORDER BY assassinations.endDate DESC;";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		while($row = mysql_fetch_assoc($result)) {
 			$new = array(
 				"assassinationId" => $row['assassinationId'],
@@ -733,6 +758,18 @@
 		return $news;
 	}
 	
+	function getTokens() {
+		$tokens = array();
+		
+		$sql = "SELECT id, name, type FROM tokens WHERE 1=1 ORDER BY name ASC ;";
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
+		while($row = mysql_fetch_assoc($result)) {
+			array_push($tokens, $row);
+		}
+		
+		return $tokens;
+	}
+	
 	function allData($playerId) {
 		$games = getGameObject($playerId, false);
 		
@@ -743,17 +780,19 @@
 		);
 		
 		$news = getNews($playerId);
+		$tokens = getTokens();
 		
 		if($player !== false) {
 			$ret = array(
 				"status" => "OK",
 				"player" => $player,
 				"news" => $news,
-				"games" => $games
+				"games" => $games,
+				"tokens" => $tokens
 			);
 		} else {
 			$ret = array(
-				"status" => "NO_PALYER",
+				"status" => "NO_PLAYER",
 				"playerId" => $playerId
 			);
 		}
@@ -761,19 +800,10 @@
 		print json_encode($ret);
 	}
 	
-	function joinGame($playerId, $alias) {
-		// check to see if alias exists
-		$sql = "SELECT * FROM players WHERE waitingAlias='$alias' LIMIT 1;";
-		$result = mysql_query($sql) or sql_error_report($sql);
-		if(mysql_num_rows($result) == 1) {
-			$ret = array( "status" => "ALIAS_TAKEN" );		
-			print json_encode($ret);
-			return;
-		}
-		
+	function joinGame($playerId, $alias, $tokens) {
 		// check to see that the player's state is NOTHING
 		$sql = "SELECT state FROM players WHERE playerId='$playerId' LIMIT 1;";
-		$result = mysql_query($sql) or sql_error_report($sql);
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
 		if($row = mysql_fetch_assoc($result)) {
 			$state = $row['state'];
 			if($state != 'NOTHING') {
@@ -785,22 +815,80 @@
 			$ret = array( "status" => "IMPOSSIBLE7" );
 			die(json_encode($ret));
 		}
-		
-		$date = getDateNow();
-		$sql = "UPDATE players SET waitingAlias='$alias', state='WAITING', waitingStart='$date' WHERE playerId='$playerId' LIMIT 1;";
-		mysql_query($sql) or sql_error_report($sql);
-		if(mysql_affected_rows() == 1) {
-			$player = getPlayerObject($playerId);
-			$ret = array(
-				"status" => "OK",
-				"player" => $player
-			);
-			print json_encode($ret);
-			return;
+			
+		// check that the game with the correct token exists
+		$tokenList = "'" . implode("','", explode(";\n", $tokens)) . "'";
+		$sql = "SELECT gameId FROM games WHERE state = 'PENDING' AND token IN ($tokenList) LIMIT 1;";
+		$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
+		if($row = mysql_fetch_assoc($result)) {
+			$gameId = $row['gameId'];
+			
+			// check to see if alias exists
+			$sql = "SELECT * FROM participations WHERE alias='$alias' AND gameId = '$gameId' LIMIT 1;";
+			$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
+			if(mysql_num_rows($result) == 1) {
+				$ret = array( "status" => "ALIAS_TAKEN" );		
+				print json_encode($ret);
+				return;
+			}
+			
+			// get the code word
+			$codewords = codewords();
+			shuffle($codewords);
+			do {
+				$codeword = array_pop($codewords);
+				$sql = "SELECT * FROM participations WHERE codeword = '$codeword' AND gameId = '$gameId' LIMIT 1;";
+				$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
+			} while(mysql_num_rows($result) > 0);
+			
+			$sql = "INSERT INTO participations (gameId, playerId, state, alias, codeword) VALUES ('$gameId', '$playerId', 'ACTIVE', '$alias', '$codeword');";
+			mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
+			
+			$sql = "UPDATE players SET state='PLAYING', waitingAlias='', waitingStart='0000-00-00 00:00:00', tokens='$tokens' WHERE playerId = '$playerId' LIMIT 1;";
+			mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
+			if(mysql_affected_rows() == 1) {
+				$player = getPlayerObject($playerId);
+				$news = getNews($playerId);
+				$game = getGameObject($playerId, $gameId);
+				$ret = array(
+					"status" => "OK",
+					"player" => $player,
+					"news" => $news,
+					"game" => $game
+				);
+				print json_encode($ret);
+				return;
+			} else {
+				$ret = array( "status" => "IMPOSSIBLE8a" );
+				print json_encode($ret);
+				return;
+			}
 		} else {
-			$ret = array( "status" => "IMPOSSIBLE8" );
-			print json_encode($ret);
-			return;
+			// check to see if alias exists
+			$sql = "SELECT * FROM players WHERE waitingAlias='$alias' LIMIT 1;";
+			$result = mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
+			if(mysql_num_rows($result) == 1) {
+				$ret = array( "status" => "ALIAS_TAKEN" );		
+				print json_encode($ret);
+				return;
+			}
+			
+			$date = getDateNow();
+			$sql = "UPDATE players SET waitingAlias='$alias', state='WAITING', waitingStart='$date', tokens='$tokens' WHERE playerId='$playerId' LIMIT 1;";
+			mysql_query($sql) or sql_error_report($sql, $_SERVER["SCRIPT_NAME"]);
+			if(mysql_affected_rows() == 1) {
+				$player = getPlayerObject($playerId);
+				$ret = array(
+					"status" => "OK",
+					"player" => $player
+				);
+				print json_encode($ret);
+				return;
+			} else {
+				$ret = array( "status" => "IMPOSSIBLE8b" );
+				print json_encode($ret);
+				return;
+			}
 		}
 	}
 ?>

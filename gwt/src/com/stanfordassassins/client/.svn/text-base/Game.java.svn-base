@@ -26,6 +26,14 @@ public class Game extends JavaScriptObject {
 	public native final int getGameId() /*-{
 		return parseInt(this.gameId, 10);
 	}-*/;
+	
+	private native final String getStartDateString() /*-{
+		return this.startDate;
+	}-*/;
+	
+	public final Date getStartDate() {
+		return FormatUtil.parseDate(getStartDateString());
+	}
 
 	private native final String getKillDeadlineString() /*-{
 		return this.killDeadline;
@@ -36,7 +44,7 @@ public class Game extends JavaScriptObject {
 	}
 	
 	private native final String getWantedDeadlineString() /*-{
-		return this.wantedDeadline;// XXX Debug, return to wanted deadline
+		return this.wantedDeadline;
 	}-*/;
 	
 	public final Date getWantedDeadline() {
@@ -73,11 +81,6 @@ public class Game extends JavaScriptObject {
 		return this.deathmatch;
 	}-*/;
 
- 
-
-	/**
-	 * Name of the game.
-	 */
 	public native final String getName() /*-{
 		return this.name;
 	}-*/;
@@ -85,6 +88,8 @@ public class Game extends JavaScriptObject {
 	public native final String getAlias() /*-{
 		return this.alias;
 	}-*/;
+	
+	
 
 	
 	

@@ -32,4 +32,13 @@ public class PlayerStats extends JavaScriptObject {
 	public native final int getGamesWon()  /*-{
 		return parseInt(this.gamesWon, 10);
 	}-*/;
+	
+	public native final int getKillingSpree()  /*-{
+	return parseInt(this.killingSpree, 10);
+}-*/;
+	
+	public native final int getLikes()  /*-{
+	return parseInt(this.likes, 10);
+}-*/;
+	
 }
